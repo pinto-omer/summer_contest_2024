@@ -22,8 +22,7 @@ struct TILE
 	int					countAnim;			// アニメーションカウント
 	int					patternAnim;		// アニメーションパターンナンバー
 	int					texNo;				// 何番目のテクスチャーを使用するのか
-	BOOL				isSolid;
-	BOOL				isGround;
+	int					type;
 
 };
 
@@ -34,6 +33,12 @@ enum {
 	TILE_WALL,
 
 	TILE_MAX
+};
+
+enum {
+	AIR,
+	SOLID,
+	GROUND,
 };
 //*****************************************************************************
 // プロトタイプ宣言

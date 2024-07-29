@@ -12,7 +12,8 @@
 #include "collision.h"
 #include "score.h"
 #include "file.h"
-
+#include "tile.h"
+#include "field.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -43,10 +44,10 @@ void DrawPlayerOffset(int no);
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ID3D11Buffer				*g_VertexBuffer = NULL;				// 頂点情報
-static ID3D11ShaderResourceView	*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11Buffer* g_VertexBuffer = NULL;				// 頂点情報
+static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
-static char *g_TexturName[TEXTURE_MAX] = {
+static char* g_TexturName[TEXTURE_MAX] = {
 	"data/TEXTURE/char01.png",
 	"data/TEXTURE/shadow000.jpg",
 };
@@ -68,7 +69,7 @@ static int		g_jump[PLAYER_JUMP_CNT_MAX] =
 //=============================================================================
 HRESULT InitPlayer(void)
 {
-	ID3D11Device *pDevice = GetDevice();
+	ID3D11Device* pDevice = GetDevice();
 
 	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
@@ -99,7 +100,7 @@ HRESULT InitPlayer(void)
 	{
 		g_PlayerCount++;
 		g_Player[i].use = TRUE;
-		g_Player[i].pos = XMFLOAT3(400.0f,850.0f, 0.0f);	// 中心点から表示
+		g_Player[i].pos = XMFLOAT3(400.0f, 850.0f, 0.0f);	// 中心点から表示
 		g_Player[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		g_Player[i].w = TEXTURE_WIDTH;
 		g_Player[i].h = TEXTURE_HEIGHT;
@@ -209,58 +210,41 @@ void UpdatePlayer(void)
 				}
 
 
-			/*	if (GetKeyboardPress(DIK_DOWN))
-				{
-					g_Player[i].pos.y += speed;
-					g_Player[i].dir = CHAR_DIR_DOWN;
-					g_Player[i].moving = TRUE;
-				}
-				else if (GetKeyboardPress(DIK_UP))
-				{
-					g_Player[i].pos.y -= speed;
-					g_Player[i].dir = CHAR_DIR_UP;
-					g_Player[i].moving = TRUE;
-				}*/
+				/*	if (GetKeyboardPress(DIK_DOWN))
+					{
+						g_Player[i].pos.y += speed;
+						g_Player[i].dir = CHAR_DIR_DOWN;
+						g_Player[i].moving = TRUE;
+					}
+					else if (GetKeyboardPress(DIK_UP))
+					{
+						g_Player[i].pos.y -= speed;
+						g_Player[i].dir = CHAR_DIR_UP;
+						g_Player[i].moving = TRUE;
+					}*/
 
-				if (GetKeyboardPress(DIK_RIGHT))
+				if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
 				{
-					g_Player[i].pos.x += speed;
-					g_Player[i].dir = CHAR_DIR_RIGHT;
-					g_Player[i].moving = TRUE;
+					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 2.0f + speed, g_Player[i].pos.y, 0));
+					if (tile == AIR)
+					{
+						g_Player[i].pos.x += speed;
+						g_Player[i].dir = CHAR_DIR_RIGHT;
+						g_Player[i].moving = TRUE;
+					}
 				}
-				else if (GetKeyboardPress(DIK_LEFT))
+				else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
 				{
-					g_Player[i].pos.x -= speed;
-					g_Player[i].dir = CHAR_DIR_LEFT;
-					g_Player[i].moving = TRUE;
+					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 2.0f - speed, g_Player[i].pos.y, 0));
+					if (tile == AIR)
+					{
+						g_Player[i].pos.x -= speed;
+						g_Player[i].dir = CHAR_DIR_LEFT;
+						g_Player[i].moving = TRUE;
+					}
 				}
 
-				// ゲームパッドでで移動処理
-			/*	if (IsButtonPressed(0, BUTTON_DOWN))
-				{
-					g_Player[i].pos.y += speed;
-					g_Player[i].dir = CHAR_DIR_DOWN;
-					g_Player[i].moving = TRUE;
-				}
-				else if (IsButtonPressed(0, BUTTON_UP))
-				{
-					g_Player[i].pos.y -= speed;
-					g_Player[i].dir = CHAR_DIR_UP;
-					g_Player[i].moving = TRUE;
-				}*/
 
-				if (IsButtonPressed(0, BUTTON_RIGHT))
-				{
-					g_Player[i].pos.x += speed;
-					g_Player[i].dir = CHAR_DIR_RIGHT;
-					g_Player[i].moving = TRUE;
-				}
-				else if (IsButtonPressed(0, BUTTON_LEFT))
-				{
-					g_Player[i].pos.x -= speed;
-					g_Player[i].dir = CHAR_DIR_LEFT;
-					g_Player[i].moving = TRUE;
-				}
 
 				// 力業ジャンプ処理
 				//if (g_jumpCnt > 0)
@@ -287,7 +271,7 @@ void UpdatePlayer(void)
 				{
 					float angle = (XM_PI / PLAYER_JUMP_CNT_MAX) * g_Player[i].jumpCnt;
 					float y = g_Player[i].jumpYMax * cosf(XM_PI / 2 + angle);
-					g_Player[i].jumpY = y;
+					g_Player[i].pos.y = g_Player[i].jumpY + y;//.jumpY = y;
 
 					g_Player[i].jumpCnt++;
 					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX)
@@ -303,32 +287,34 @@ void UpdatePlayer(void)
 				{
 					g_Player[i].jump = TRUE;
 					g_Player[i].jumpCnt = 0;
-					g_Player[i].jumpY = 0.0f;
+					g_Player[i].jumpY = g_Player[i].pos.y;
 				}
 
 
 				// MAP外チェック
 				BG* bg = GetBG();
 
-				if (g_Player[i].pos.x < 0.0f)
+				if (g_Player[i].pos.x < g_Player[i].w / 2.0f)
 				{
-					g_Player[i].pos.x = 0.0f;
+					g_Player[i].pos.x = g_Player[i].w / 2.0f;
 				}
 
-				if (g_Player[i].pos.x > bg->w)
+				else if (g_Player[i].pos.x > bg->w - (g_Player[i].w / 2.0f))
 				{
-					g_Player[i].pos.x = bg->w;
+					g_Player[i].pos.x = bg->w - (g_Player[i].w / 2.0f);
 				}
 
-				if (g_Player[i].pos.y < 0.0f)
+				if (g_Player[i].pos.y < g_Player[i].h / 2.0f)
 				{
-					g_Player[i].pos.y = 0.0f;
+					g_Player[i].pos.y = g_Player[i].h / 2.0f;
 				}
 
-				if (g_Player[i].pos.y > bg->h)
+				else if (g_Player[i].pos.y > bg->h - (g_Player[i].h / 2.0f))
 				{
-					g_Player[i].pos.y = bg->h;
+					g_Player[i].pos.y = bg->h - (g_Player[i].h / 2.0f);
 				}
+
+
 
 				// プレイヤーの立ち位置からMAPのスクロール座標を計算する
 				bg->pos.x = g_Player[i].pos.x - PLAYER_DISP_X;
@@ -433,8 +419,10 @@ void DrawPlayer(void)
 
 				float px = g_Player[i].pos.x - bg->pos.x;	// プレイヤーの表示位置X
 				float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
+				if (g_Player[i].jump == TRUE)
+					py = g_Player[i].jumpY - bg->pos.y;
 				float pw = g_Player[i].w;		// プレイヤーの表示幅
-				float ph = g_Player[i].h/4;		// プレイヤーの表示高さ
+				float ph = g_Player[i].h / 4;		// プレイヤーの表示高さ
 				py += 50.0f;		// 足元に表示
 
 				float tw = 1.0f;	// テクスチャの幅
@@ -468,7 +456,7 @@ void DrawPlayer(void)
 			float pw = g_Player[i].w;		// プレイヤーの表示幅
 			float ph = g_Player[i].h;		// プレイヤーの表示高さ
 
-			py += g_Player[i].jumpY;		// ジャンプ中の高さを足す
+			//py += g_Player[i].jumpY;		// ジャンプ中の高さを足す
 
 			// アニメーション用
 			float tw = 1.0f / TEXTURE_PATTERN_DIVIDE_X;	// テクスチャの幅

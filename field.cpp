@@ -16,9 +16,6 @@
 
 #define TEXTURE_WIDTH_LOGO			(480)			// ロゴサイズ
 #define TEXTURE_HEIGHT_LOGO			(80)			// 
-
-#define FIELD_TILE_W				(40)
-#define FIELD_TILE_H				(20)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -93,10 +90,9 @@ HRESULT InitField(void)
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
 
-
+	memcpy(g_Field.field, field1, sizeof(g_Field.field));
 	// 変数の初期化
-	g_Field.w = TEXTURE_WIDTH;
-	g_Field.h = TEXTURE_HEIGHT;
+	
 	g_Field.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	g_Field.texNo = 0;
 
@@ -104,7 +100,8 @@ HRESULT InitField(void)
 	g_Field.scrl2 = 0.0f;		// TEXスクロール
 	
 	InitTile();
-
+	g_Field.tile_w = GetTile()->w;
+	g_Field.tile_h = GetTile()->h;
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -175,7 +172,7 @@ void DrawField(void)
 			{
 				continue;
 			}
-			DrawTile(field1[i][j], pos);
+			DrawTile(g_Field.field[i][j], pos);
 				
 		}
 	}
@@ -188,6 +185,11 @@ void DrawField(void)
 FIELD* GetField(void)
 {
 	return &g_Field;
+}
+
+int GetTileType(XMFLOAT3 pos)
+{
+	return GetTile()[g_Field.field[(int)(pos.y / g_Field.tile_h)][(int)(pos.x / g_Field.tile_w)]].type;
 }
 
 

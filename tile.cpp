@@ -83,11 +83,10 @@ HRESULT InitTile(void)
 
 		g_Tile[i].countAnim = 0;
 		g_Tile[i].patternAnim = 0;
-		g_Tile[i].isGround = FALSE;
-		g_Tile[i].isSolid = TRUE;
+		g_Tile[i].type = SOLID;
 	}
 
-	g_Tile[TILE_GROUND].isGround = TRUE;
+	g_Tile[TILE_GROUND].type = GROUND;
 
 
 	g_Load = TRUE;
