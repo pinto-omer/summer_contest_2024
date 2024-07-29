@@ -263,7 +263,13 @@ void UpdatePlayer(void)
 				//	g_jumpCnt++;
 				//}
 
-
+				if (GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == AIR &&
+					g_Player[i].jump == FALSE)
+				{
+					g_Player[i].jump = TRUE;
+					g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX / 2;
+					g_Player[i].jumpY = g_Player[i].pos.y + PLAYER_JUMP_Y_MAX;
+				}
 
 
 				// ジャンプ処理中？
@@ -272,13 +278,19 @@ void UpdatePlayer(void)
 					float angle = (XM_PI / PLAYER_JUMP_CNT_MAX) * g_Player[i].jumpCnt;
 					float y = g_Player[i].jumpYMax * cosf(XM_PI / 2 + angle);
 					g_Player[i].pos.y = g_Player[i].jumpY + y;//.jumpY = y;
-
-					g_Player[i].jumpCnt++;
-					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX)
+					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2 &&
+						GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == GROUND)
 					{
+						g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y;
 						g_Player[i].jump = FALSE;
 						g_Player[i].jumpCnt = 0;
 						g_Player[i].jumpY = 0.0f;
+					}
+					else
+					{
+
+						g_Player[i].jumpCnt++;
+
 					}
 
 				}
@@ -420,10 +432,11 @@ void DrawPlayer(void)
 				float px = g_Player[i].pos.x - bg->pos.x;	// プレイヤーの表示位置X
 				float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
 				if (g_Player[i].jump == TRUE)
-					py = g_Player[i].jumpY - bg->pos.y;
+					py = GetGroundBelow(g_Player[i].pos).y + GetField()->tile_h - bg->pos.y;
+				else
+					py += 50.0f;		// 足元に表示
 				float pw = g_Player[i].w;		// プレイヤーの表示幅
 				float ph = g_Player[i].h / 4;		// プレイヤーの表示高さ
-				py += 50.0f;		// 足元に表示
 
 				float tw = 1.0f;	// テクスチャの幅
 				float th = 1.0f;	// テクスチャの高さ

@@ -42,5 +42,5 @@ void DrawField(void);
 
 FIELD* GetField(void);
 int GetTileType(XMFLOAT3 pos);
-
+XMFLOAT3 GetGroundBelow(XMFLOAT3 pos);
 
