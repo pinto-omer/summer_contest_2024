@@ -31,7 +31,7 @@
 
 // ジャンプ処理
 #define	PLAYER_JUMP_CNT_MAX			(30)		// 30フレームで着地する
-#define	PLAYER_JUMP_Y_MAX			(300.0f)	// ジャンプの高さ
+#define	PLAYER_JUMP_Y_MAX			(150.0f)	// ジャンプの高さ
 
 
 //*****************************************************************************
@@ -99,7 +99,7 @@ HRESULT InitPlayer(void)
 	{
 		g_PlayerCount++;
 		g_Player[i].use = TRUE;
-		g_Player[i].pos = XMFLOAT3(400.0f, 400.0f, 0.0f);	// 中心点から表示
+		g_Player[i].pos = XMFLOAT3(400.0f,850.0f, 0.0f);	// 中心点から表示
 		g_Player[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		g_Player[i].w = TEXTURE_WIDTH;
 		g_Player[i].h = TEXTURE_HEIGHT;
@@ -209,7 +209,7 @@ void UpdatePlayer(void)
 				}
 
 
-				if (GetKeyboardPress(DIK_DOWN))
+			/*	if (GetKeyboardPress(DIK_DOWN))
 				{
 					g_Player[i].pos.y += speed;
 					g_Player[i].dir = CHAR_DIR_DOWN;
@@ -220,7 +220,7 @@ void UpdatePlayer(void)
 					g_Player[i].pos.y -= speed;
 					g_Player[i].dir = CHAR_DIR_UP;
 					g_Player[i].moving = TRUE;
-				}
+				}*/
 
 				if (GetKeyboardPress(DIK_RIGHT))
 				{
@@ -236,7 +236,7 @@ void UpdatePlayer(void)
 				}
 
 				// ゲームパッドでで移動処理
-				if (IsButtonPressed(0, BUTTON_DOWN))
+			/*	if (IsButtonPressed(0, BUTTON_DOWN))
 				{
 					g_Player[i].pos.y += speed;
 					g_Player[i].dir = CHAR_DIR_DOWN;
@@ -247,7 +247,7 @@ void UpdatePlayer(void)
 					g_Player[i].pos.y -= speed;
 					g_Player[i].dir = CHAR_DIR_UP;
 					g_Player[i].moving = TRUE;
-				}
+				}*/
 
 				if (IsButtonPressed(0, BUTTON_RIGHT))
 				{
@@ -299,7 +299,7 @@ void UpdatePlayer(void)
 
 				}
 				// ジャンプボタン押した？
-				else if ((g_Player[i].jump == FALSE) && (GetKeyboardTrigger(DIK_J)))
+				else if ((g_Player[i].jump == FALSE) && (GetKeyboardTrigger(DIK_SPACE)))
 				{
 					g_Player[i].jump = TRUE;
 					g_Player[i].jumpCnt = 0;
@@ -363,12 +363,12 @@ void UpdatePlayer(void)
 				}
 
 				// バレット処理
-				if (GetKeyboardTrigger(DIK_SPACE))
-				{
-					XMFLOAT3 pos = g_Player[i].pos;
-					pos.y += g_Player[i].jumpY;
-					SetBullet(pos);
-				}
+				//if (GetKeyboardTrigger(DIK_SPACE))
+				//{
+				//	XMFLOAT3 pos = g_Player[i].pos;
+				//	pos.y += g_Player[i].jumpY;
+				//	SetBullet(pos);
+				//}
 
 				if (IsButtonTriggered(0, BUTTON_B))
 				{

@@ -19,7 +19,7 @@
 #include "result.h"
 #include "sound.h"
 #include "fade.h"
-
+#include "field.h"
 #include "file.h"
 
 #include "effect.h"
@@ -309,6 +309,7 @@ void Update(void)
 
 	case MODE_GAME:			// ゲーム画面の更新
 		UpdateBG();
+		UpdateField();
 		UpdatePlayer();
 		UpdateEnemy();
 		UpdateBullet();
@@ -364,6 +365,7 @@ void Draw(void)
 
 	case MODE_GAME:			// ゲーム画面の描画
 		DrawBG();
+		DrawField();
 		DrawBullet();		// 重なる順番を意識してね
 		DrawEnemy();
 		DrawPlayer();
@@ -427,6 +429,7 @@ void SetMode(int mode)
 	// BGの終了処理
 	UninitBG();
 
+	UninitField();
 	// プレイヤーの終了処理
 	UninitPlayer();
 
@@ -459,6 +462,7 @@ void SetMode(int mode)
 	case MODE_GAME:
 		// ゲーム画面の初期化
 		InitBG();
+		InitField();
 		InitPlayer();
 		InitEnemy();
 		InitBullet();

@@ -143,6 +143,7 @@
     <ClInclude Include="effect.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="fade.h" />
+    <ClInclude Include="field.h" />
     <ClInclude Include="file.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="main.h" />
@@ -152,6 +153,7 @@
     <ClInclude Include="score.h" />
     <ClInclude Include="sound.h" />
     <ClInclude Include="sprite.h" />
+    <ClInclude Include="tile.h" />
     <ClInclude Include="title.h" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +165,7 @@
     <ClCompile Include="effect.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="fade.cpp" />
+    <ClCompile Include="field.cpp" />
     <ClCompile Include="file.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
@@ -172,6 +175,7 @@
     <ClCompile Include="score.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="sprite.cpp" />
+    <ClCompile Include="tile.cpp" />
     <ClCompile Include="title.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
