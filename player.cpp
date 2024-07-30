@@ -19,11 +19,11 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(200/2)	// キャラサイズ
 #define TEXTURE_HEIGHT				(200/2)	// 
-#define TEXTURE_MAX					(2)		// テクスチャの数
+#define TEXTURE_MAX					(CHAR_DIR_MAX+1)		// テクスチャの数
 
-#define TEXTURE_PATTERN_DIVIDE_X	(3)		// アニメパターンのテクスチャ内分割数（X)
-#define TEXTURE_PATTERN_DIVIDE_Y	(4)		// アニメパターンのテクスチャ内分割数（Y)
-#define ANIM_PATTERN_NUM			(TEXTURE_PATTERN_DIVIDE_X*TEXTURE_PATTERN_DIVIDE_Y)	// アニメーションパターン数
+//#define TEXTURE_PATTERN_DIVIDE_X	(3)		// アニメパターンのテクスチャ内分割数（X)
+//#define TEXTURE_PATTERN_DIVIDE_Y	(4)		// アニメパターンのテクスチャ内分割数（Y)
+//#define ANIM_PATTERN_NUM			(TEXTURE_PATTERN_DIVIDE_X*TEXTURE_PATTERN_DIVIDE_Y)	// アニメーションパターン数
 #define ANIM_WAIT					(4)		// アニメーションの切り替わるWait値
 
 // プレイヤーの画面内配置座標
@@ -48,10 +48,21 @@ static ID3D11Buffer* g_VertexBuffer = NULL;				// 頂点情報
 static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char* g_TexturName[TEXTURE_MAX] = {
-	"data/TEXTURE/char01.png",
-	"data/TEXTURE/shadow000.jpg",
+	"data/TEXTURE/Enchantress/walk_right.png",
+	"data/TEXTURE/Enchantress/walk_left.png",
+	"data/TEXTURE/Enchantress/idle.png",
+	"data/TEXTURE/shadow000.jpg"
 };
 
+static int texturePatternDivideX[TEXTURE_MAX] = {
+	8,8,5
+};
+
+static int texturePatternDivideY[TEXTURE_MAX] = {
+	1,1,1
+};
+
+static int animPatternNum[TEXTURE_MAX] = { 0 };
 
 static BOOL		g_Load = FALSE;				// 初期化を行ったかのフラグ
 static PLAYER	g_Player[PLAYER_MAX];		// プレイヤー構造体
@@ -81,6 +92,8 @@ HRESULT InitPlayer(void)
 			NULL,
 			&g_Texture[i],
 			NULL);
+
+		animPatternNum[i] = texturePatternDivideX[i] * texturePatternDivideY[i];
 	}
 
 
@@ -104,16 +117,16 @@ HRESULT InitPlayer(void)
 		g_Player[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		g_Player[i].w = TEXTURE_WIDTH;
 		g_Player[i].h = TEXTURE_HEIGHT;
-		g_Player[i].texNo = 0;
+		g_Player[i].texNo = CHAR_DIR_IDLE;
 
 		g_Player[i].countAnim = 0;
 		g_Player[i].patternAnim = 0;
 
 		g_Player[i].move = XMFLOAT3(4.0f, 0.0f, 0.0f);		// 移動量
 
-		g_Player[i].dir = CHAR_DIR_DOWN;					// 下向きにしとくか
+		g_Player[i].dir = CHAR_DIR_IDLE;					// 下向きにしとくか
 		g_Player[i].moving = FALSE;							// 移動中フラグ
-		g_Player[i].patternAnim = g_Player[i].dir * TEXTURE_PATTERN_DIVIDE_X;
+		g_Player[i].patternAnim = 0;// g_Player[i].dir* TEXTURE_PATTERN_DIVIDE_X;
 
 		// ジャンプの初期化
 		g_Player[i].jump = FALSE;
@@ -185,21 +198,28 @@ void UpdatePlayer(void)
 			g_Player[i].offset[0] = pos_old;
 
 			// アニメーション  
-			if (g_Player[i].moving == TRUE)
+			if (g_Player[i].moving == TRUE || g_Player[i].dir == CHAR_DIR_IDLE)
 			{
-				g_Player[i].countAnim += 1.0f;
+				if (g_Player[i].dir == CHAR_DIR_IDLE)
+					g_Player[i].countAnim += 0.33f;
+				else
+					g_Player[i].countAnim += 1.0f;
 				if (g_Player[i].countAnim > ANIM_WAIT)
 				{
 					g_Player[i].countAnim = 0.0f;
 					// パターンの切り替え
-					g_Player[i].patternAnim = (g_Player[i].dir * TEXTURE_PATTERN_DIVIDE_X) + ((g_Player[i].patternAnim + 1) % TEXTURE_PATTERN_DIVIDE_X);
+					//g_Player[i].patternAnim = (g_Player[i].dir * TEXTURE_PATTERN_DIVIDE_X) + ((g_Player[i].patternAnim + 1) % TEXTURE_PATTERN_DIVIDE_X);
+					g_Player[i].patternAnim = (g_Player[i].patternAnim + 1) % texturePatternDivideX[g_Player[i].dir];
 				}
 			}
-			else
+			else if (g_Player[i].jump == FALSE && g_Player[i].dir != CHAR_DIR_IDLE)
 			{
+				g_Player[i].dir = CHAR_DIR_IDLE;
+				g_Player[i].texNo = g_Player[i].dir;
 				g_Player[i].countAnim = 0.0f;
-				g_Player[i].patternAnim = (g_Player[i].dir * TEXTURE_PATTERN_DIVIDE_X) + 1;
+				g_Player[i].patternAnim = 0;
 			}
+
 			// キー入力で移動 
 			{
 				float speed = g_Player[i].move.x;
@@ -229,21 +249,23 @@ void UpdatePlayer(void)
 
 				if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
 				{
-					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 2.5f, g_Player[i].pos.y, 0));
+					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 4.0f, g_Player[i].pos.y, 0));
 					if (tile == AIR)
 					{
 						g_Player[i].pos.x += speed;
 						g_Player[i].dir = CHAR_DIR_RIGHT;
+						g_Player[i].texNo = g_Player[i].dir;
 						g_Player[i].moving = TRUE;
 					}
 				}
 				else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
 				{
-					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 2.5f, g_Player[i].pos.y, 0));
+					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 4.0f, g_Player[i].pos.y, 0));
 					if (tile == AIR)
 					{
 						g_Player[i].pos.x -= speed;
 						g_Player[i].dir = CHAR_DIR_LEFT;
+						g_Player[i].texNo = g_Player[i].dir;
 						g_Player[i].moving = TRUE;
 					}
 				}
@@ -272,7 +294,7 @@ void UpdatePlayer(void)
 					g_Player[i].jump == FALSE)
 				{
 					g_Player[i].jump = TRUE;
-					g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX +1 ;//PLAYER_JUMP_CNT_MAX / 2;
+					g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX + 1;//PLAYER_JUMP_CNT_MAX / 2;
 					g_Player[i].jumpY = 0;// g_Player[i].pos.y + PLAYER_JUMP_Y_MAX;
 				}
 
@@ -448,7 +470,7 @@ void DrawPlayer(void)
 				SetBlendState(BLEND_MODE_SUBTRACT);	// 減算合成
 
 				// テクスチャ設定
-				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[1]);
+				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[CHAR_DIR_MAX]);
 
 				float px = g_Player[i].pos.x - bg->pos.x;	// プレイヤーの表示位置X
 				float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
@@ -493,10 +515,10 @@ void DrawPlayer(void)
 			//py += g_Player[i].jumpY;		// ジャンプ中の高さを足す
 
 			// アニメーション用
-			float tw = 1.0f / TEXTURE_PATTERN_DIVIDE_X;	// テクスチャの幅
-			float th = 1.0f / TEXTURE_PATTERN_DIVIDE_Y;	// テクスチャの高さ
-			float tx = (float)(g_Player[i].patternAnim % TEXTURE_PATTERN_DIVIDE_X) * tw;	// テクスチャの左上X座標
-			float ty = (float)(g_Player[i].patternAnim / TEXTURE_PATTERN_DIVIDE_X) * th;	// テクスチャの左上Y座標
+			float tw = 1.0f / texturePatternDivideX[g_Player[i].dir];	// テクスチャの幅
+			float th = 1.0f / texturePatternDivideY[g_Player[i].dir];	// テクスチャの高さ
+			float tx = (float)(g_Player[i].patternAnim % texturePatternDivideX[g_Player[i].dir]) * tw;	// テクスチャの左上X座標
+			float ty = (float)(g_Player[i].patternAnim / texturePatternDivideX[g_Player[i].dir]) * th;	// テクスチャの左上Y座標
 
 			//float tw = 1.0f;	// テクスチャの幅
 			//float th = 1.0f;	// テクスチャの高さ
@@ -554,10 +576,10 @@ void DrawPlayerOffset(int no)
 		float ph = g_Player[no].h;		// プレイヤーの表示高さ
 
 		// アニメーション用
-		float tw = 1.0f / TEXTURE_PATTERN_DIVIDE_X;	// テクスチャの幅
-		float th = 1.0f / TEXTURE_PATTERN_DIVIDE_Y;	// テクスチャの高さ
-		float tx = (float)(g_Player[no].patternAnim % TEXTURE_PATTERN_DIVIDE_X) * tw;	// テクスチャの左上X座標
-		float ty = (float)(g_Player[no].patternAnim / TEXTURE_PATTERN_DIVIDE_X) * th;	// テクスチャの左上Y座標
+		float tw = 1.0f / texturePatternDivideX[g_Player[no].dir];	// テクスチャの幅
+		float th = 1.0f / texturePatternDivideY[g_Player[no].dir];	// テクスチャの高さ
+		float tx = (float)(g_Player[no].patternAnim % texturePatternDivideX[g_Player[no].dir]) * tw;	// テクスチャの左上X座標
+		float ty = (float)(g_Player[no].patternAnim / texturePatternDivideX[g_Player[no].dir]) * th;	// テクスチャの左上Y座標
 
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
