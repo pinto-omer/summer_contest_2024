@@ -195,7 +195,11 @@ void UpdatePlayer(void)
 					g_Player[i].patternAnim = (g_Player[i].dir * TEXTURE_PATTERN_DIVIDE_X) + ((g_Player[i].patternAnim + 1) % TEXTURE_PATTERN_DIVIDE_X);
 				}
 			}
-
+			else
+			{
+				g_Player[i].countAnim = 0.0f;
+				g_Player[i].patternAnim = (g_Player[i].dir * TEXTURE_PATTERN_DIVIDE_X) + 1;
+			}
 			// キー入力で移動 
 			{
 				float speed = g_Player[i].move.x;
@@ -225,7 +229,7 @@ void UpdatePlayer(void)
 
 				if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
 				{
-					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 2.0f + speed, g_Player[i].pos.y, 0));
+					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 2.5f, g_Player[i].pos.y, 0));
 					if (tile == AIR)
 					{
 						g_Player[i].pos.x += speed;
@@ -235,7 +239,7 @@ void UpdatePlayer(void)
 				}
 				else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
 				{
-					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 2.0f - speed, g_Player[i].pos.y, 0));
+					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 2.5f, g_Player[i].pos.y, 0));
 					if (tile == AIR)
 					{
 						g_Player[i].pos.x -= speed;
@@ -243,6 +247,7 @@ void UpdatePlayer(void)
 						g_Player[i].moving = TRUE;
 					}
 				}
+
 
 
 
@@ -267,17 +272,26 @@ void UpdatePlayer(void)
 					g_Player[i].jump == FALSE)
 				{
 					g_Player[i].jump = TRUE;
-					g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX / 2;
-					g_Player[i].jumpY = g_Player[i].pos.y + PLAYER_JUMP_Y_MAX;
+					g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX +1 ;//PLAYER_JUMP_CNT_MAX / 2;
+					g_Player[i].jumpY = 0;// g_Player[i].pos.y + PLAYER_JUMP_Y_MAX;
 				}
 
 
 				// ジャンプ処理中？
 				if (g_Player[i].jump == TRUE)
 				{
+					/*float angle = (XM_PI / PLAYER_JUMP_CNT_MAX) * g_Player[i].jumpCnt;
+					float y = g_Player[i].jumpYMax * cosf(XM_PI / 2 + angle);
+					g_Player[i].pos.y = g_Player[i].jumpY + y;*/
 					float angle = (XM_PI / PLAYER_JUMP_CNT_MAX) * g_Player[i].jumpCnt;
 					float y = g_Player[i].jumpYMax * cosf(XM_PI / 2 + angle);
-					g_Player[i].pos.y = g_Player[i].jumpY + y;//.jumpY = y;
+					if (y - g_Player[i].jumpY > g_Player[i].jumpYMax / 5.0f)
+						g_Player[i].pos.y += g_Player[i].jumpYMax / 5.0f;
+					else
+					{
+						g_Player[i].pos.y += y - g_Player[i].jumpY;
+						g_Player[i].jumpY = y;
+					}
 					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2 &&
 						GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == GROUND)
 					{
@@ -290,10 +304,12 @@ void UpdatePlayer(void)
 					{
 
 						g_Player[i].jumpCnt++;
-						if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX)
+						if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX + PLAYER_JUMP_CNT_MAX / 4)
+							g_Player[i].jumpY = 0;
+						if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX + PLAYER_JUMP_CNT_MAX / 2 + 1)
 						{
-							g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX;
-							g_Player[i].jumpY+=g_Player[i].jumpYMax / 10.0f;
+							g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX + PLAYER_JUMP_CNT_MAX / 2 + 1;
+							//g_Player[i].jumpY+=g_Player[i].jumpYMax / 10.0f;
 						}
 
 					}
@@ -303,8 +319,8 @@ void UpdatePlayer(void)
 				else if ((g_Player[i].jump == FALSE) && (GetKeyboardTrigger(DIK_SPACE)))
 				{
 					g_Player[i].jump = TRUE;
-					g_Player[i].jumpCnt = 0;
-					g_Player[i].jumpY = g_Player[i].pos.y;
+					g_Player[i].jumpCnt = 1;
+					g_Player[i].jumpY = 0;// g_Player[i].pos.y;
 				}
 
 
@@ -373,12 +389,12 @@ void UpdatePlayer(void)
 				//	SetBullet(pos);
 				//}
 
-				if (IsButtonTriggered(0, BUTTON_B))
+				/*if (IsButtonTriggered(0, BUTTON_B))
 				{
 					XMFLOAT3 pos = g_Player[i].pos;
 					pos.y += g_Player[i].jumpY;
 					SetBullet(pos);
-				}
+				}*/
 
 			}
 		}
