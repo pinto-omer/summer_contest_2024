@@ -10,7 +10,7 @@
 *******************************************************************************/
 #include "file.h"
 #include "score.h"
-
+#include "field.h"
 
 /*******************************************************************************
 * マクロ定義
@@ -40,7 +40,7 @@
 * グローバル変数
 *******************************************************************************/
 SAVEDATA	save;		// セーブデータ作成場所
-
+SAVEFIELD	sField;
 
 /*******************************************************************************
 関数名:	void SaveData( void )
@@ -188,6 +188,107 @@ void LoadData(void)
 	// スコアデータをロードする
 	SetScore(save.score);
 
+
+}
+
+void SaveField(int id)
+{
+
+	{	
+		FIELD* field = GetField();
+		memcpy(sField.field, field->field, sizeof(sField.field));
+	}
+
+	// セーブデータのチェックサムを求める
+	{
+		char* adr = (char*)&sField;	// デーブデータの先頭アドレスをadrに入れる
+		int  sum = 0;				// 計算するチェックサム
+
+		sField.sum = 0;				// セーブデータ側のチェックサムを０でクリアしていく
+
+		for (int i = 0; i < sizeof(SAVEFIELD); i++)
+		{
+			sum += adr[i];
+		}
+
+		sField.sum = sum;
+	}
+
+
+
+	// SAVEDATA構造体ごと全部をファイルに出力する
+	FILE* fp;
+	static char fileName[12] = "field01.bin";
+	fileName[6] = '0' + id;
+	printf("\nセーブ開始・・・");
+	fp = fopen(fileName, "wb");			// ファイルをバイナリ書き込みモードでOpenする
+
+	if (fp != NULL)								// ファイルがあれば書き込み、無ければ無視
+	{
+		fwrite(&sField, 1, sizeof(SAVEFIELD), fp);	// 指定したアドレスから指定したバイト数分ファイルへ書き込む
+		fclose(fp);								// Openしていたファイルを閉じる
+		printf("終了！\n");
+	}
+	else
+	{
+		printf("ファイルエラー！\n");
+	}
+
+}
+
+void LoadField(int id)
+{
+
+	// ファイルからセーブデータを読み込む
+	FILE* fp;
+	static char fileName[12] = "field01.bin";
+	fileName[6] = '0' + id;
+	printf("\nロード開始・・・");
+
+	fp = fopen(fileName, "rb");	// ファイルをバイナリ読み込みモードでOpenする
+
+	if (fp != NULL)						// ファイルがあれば書き込み、無ければ無視
+	{
+		fread(&sField, 1, sizeof(SAVEFIELD), fp);	// 指定したアドレスへ指定したバイト数分ファイルから読み込む
+		fclose(fp);								// Openしていたファイルを閉じる
+		printf("終了！\n");
+	}
+	else
+	{
+		printf("ファイルエラー！\n");
+	}
+
+
+	// セーブデータのチェックサムが合っているか調べる
+	{
+		char* adr = (char*)&sField;	// デーブデータの先頭アドレスをadrに入れる
+		int  sum = 0;				// 計算するチェックサム
+		int  org = sField.sum;		// セーブデータ内のチェックサム
+
+		sField.sum = 0;				// セーブデータ側のチェックサムを０でクリアしていく
+
+		for (int i = 0; i < sizeof(SAVEFIELD); i++)
+		{
+			sum += adr[i];
+		}
+
+		// 元々のチェックサムと再計算したチェックサムが同じか調べている
+		if (sum != org)
+		{
+			// データが改ざんされている！
+			return;
+		}
+	}
+
+	{	
+		
+		FIELD* field = GetField();
+		memcpy(field->field, sField.field, sizeof(sField.field));
+		
+		
+	}
+
+	
 
 }
 

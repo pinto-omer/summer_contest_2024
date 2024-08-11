@@ -269,6 +269,15 @@ void UpdatePlayer(void)
 						g_Player[i].moving = TRUE;
 					}
 				}
+				//field edit debug
+				else if (GetKeyboardTrigger(DIK_F2))
+				{
+					SaveField(1);
+				}
+				else if (GetKeyboardTrigger(DIK_F3))
+				{
+					LoadField(1);
+				}
 
 
 

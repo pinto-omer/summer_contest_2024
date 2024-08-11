@@ -10,7 +10,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "score.h"
-
+#include "field.h"
 /*******************************************************************************
 * マクロ定義
 *******************************************************************************/
@@ -36,7 +36,12 @@ struct	SAVEDATA				// セーブデータの構造体
 	int		sum;				// チェックサムを入れる
 };
 
+struct SAVEFIELD
+{
+	int field[FIELD_TILE_H][FIELD_TILE_W];
 
+	int sum;
+};
 
 /*******************************************************************************
 * プロトタイプ宣言
@@ -44,4 +49,6 @@ struct	SAVEDATA				// セーブデータの構造体
 void SaveData(void);
 void LoadData(void);
 
+void SaveField(int id);
+void LoadField(int id);
 
