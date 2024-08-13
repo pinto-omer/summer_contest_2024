@@ -1,6 +1,6 @@
 //=============================================================================
 //
-// バレット処理 [tile.h]
+// プレイヤー処理 [editor.h]
 // Author : 
 //
 //=============================================================================
@@ -8,6 +8,7 @@
 
 #include "main.h"
 #include "renderer.h"
+#include "debugproc.h"
 #include "sprite.h"
 
 //*****************************************************************************
@@ -15,40 +16,31 @@
 //*****************************************************************************
 
 
-// バレット構造体
-struct TILE
+//*****************************************************************************
+// 構造体定義
+//*****************************************************************************
+
+struct EDITOR
 {
-	float				w, h;				// 幅と高さ
-	int					countAnim;			// アニメーションカウント
-	int					patternAnim;		// アニメーションパターンナンバー
-	int					texNo;				// 何番目のテクスチャーを使用するのか
-	int					type;
+	XMFLOAT3	pos;			// ポリゴンの座標
+	float		w, h;			// 幅と高さ
+	float		countAnim;		// アニメーションカウント
+	int			patternAnim;	// アニメーションパターンナンバー
+	int			texNo;			// テクスチャ番号
+
+	XMFLOAT3	move;			// 移動速度
 
 };
 
-enum {
-//	TILE_PLAYER = -2,
-	TILE_EMPTY,
-	TILE_GROUND,
-	TILE_WALL,
 
-	TILE_MAX
-};
-
-enum {
-	AIR,
-	SOLID,
-	GROUND,
-};
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitTile(void);
-void UninitTile(void);
-void UpdateTile(void);
-void DrawTile(int tileIDX, XMFLOAT3 pos);
+HRESULT InitEditor(void);
+void UninitEditor(void);
+void UpdateEditor(void);
+void DrawEditor(void);
 
-TILE* GetTile(void);
-void SetTile(XMFLOAT3 pos);
+EDITOR* GetEditor(void);
 
 

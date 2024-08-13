@@ -306,7 +306,11 @@ void Update(void)
 	case MODE_TITLE:		// タイトル画面の更新
 		UpdateTitle();
 		break;
-
+	case MODE_EDITOR:
+		UpdateBG();
+		UpdateField();
+		UpdateEffect();
+		break;
 	case MODE_GAME:			// ゲーム画面の更新
 		UpdateBG();
 		UpdateField();
@@ -458,7 +462,11 @@ void SetMode(int mode)
 		InitTitle();
 		//PlaySound(SOUND_LABEL_BGM_maou);
 		break;
-
+	case MODE_EDITOR:
+		InitBG();
+		InitField();
+		InitEffect();
+		break;
 	case MODE_GAME:
 		// ゲーム画面の初期化
 		InitBG();

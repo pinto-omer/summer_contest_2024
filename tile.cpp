@@ -36,6 +36,7 @@ static ID3D11Buffer* g_VertexBuffer = NULL;				// 頂点情報
 static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char* g_TexturName[] = {
+	"",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_01.png",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_37.png",
 };
@@ -86,6 +87,7 @@ HRESULT InitTile(void)
 		g_Tile[i].type = SOLID;
 	}
 
+	g_Tile[TILE_EMPTY].type = AIR;
 	g_Tile[TILE_GROUND].type = GROUND;
 
 
