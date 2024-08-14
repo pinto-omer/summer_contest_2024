@@ -18,16 +18,15 @@
 // バレット構造体
 struct TILE
 {
-	float				w, h;				// 幅と高さ
-	int					countAnim;			// アニメーションカウント
-	int					patternAnim;		// アニメーションパターンナンバー
-	int					texNo;				// 何番目のテクスチャーを使用するのか
-	int					type;
+	float						w, h;				// 幅と高さ
+	int							countAnim;			// アニメーションカウント
+	int							patternAnim;		// アニメーションパターンナンバー
+	int							texNo;				// 何番目のテクスチャーを使用するのか
+	int							type;
 
 };
 
-enum {
-//	TILE_PLAYER = -2,
+enum {//	TILE_PLAYER = -2,
 	TILE_EMPTY,
 	TILE_GROUND,
 	TILE_WALL,
@@ -46,9 +45,8 @@ enum {
 HRESULT InitTile(void);
 void UninitTile(void);
 void UpdateTile(void);
-void DrawTile(int tileIDX, XMFLOAT3 pos);
+void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile);
 
 TILE* GetTile(void);
 void SetTile(XMFLOAT3 pos);
-
 

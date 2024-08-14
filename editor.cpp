@@ -42,8 +42,7 @@ static ID3D11Buffer* g_VertexBuffer = NULL;				// 頂点情報
 static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char* g_TexturName[TEXTURE_MAX] = {
-	"data/TEXTURE/Enchantress/walk_right.png",
-	"data/TEXTURE/Enchantress/walk_left.png",
+	"data/TEXTURE/border.png",
 };
 
 
@@ -293,8 +292,14 @@ void DrawEditor(void)
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
 
+	// １枚のポリゴンの頂点とテクスチャ座標を設定
+	SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
+	// ポリゴン描画
+	GetDeviceContext()->Draw(4, 0);
 }
 
 

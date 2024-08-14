@@ -10,7 +10,7 @@
 #include "score.h"
 #include "bg.h"
 #include "effect.h"
-
+#include "editor.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -81,7 +81,6 @@ HRESULT InitTile(void)
 		g_Tile[i].w = TEXTURE_WIDTH;
 		g_Tile[i].h = TEXTURE_HEIGHT;
 		g_Tile[i].texNo = i;
-
 		g_Tile[i].countAnim = 0;
 		g_Tile[i].patternAnim = 0;
 		g_Tile[i].type = SOLID;
@@ -157,7 +156,7 @@ void UpdateTile(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawTile(int tileIDX, XMFLOAT3 pos)
+void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile)
 {
 	if (tileIDX < 0 || tileIDX >= TILE_MAX) return;
 	// 頂点バッファ設定
@@ -192,12 +191,12 @@ void DrawTile(int tileIDX, XMFLOAT3 pos)
 	float th = 1.0f / TEXTURE_PATTERN_DIVIDE_Y;	// テクスチャの高さ
 	float tx = (float)(g_Tile[tileIDX].patternAnim % TEXTURE_PATTERN_DIVIDE_X) * tw;	// テクスチャの左上X座標
 	float ty = (float)(g_Tile[tileIDX].patternAnim / TEXTURE_PATTERN_DIVIDE_X) * th;	// テクスチャの左上Y座標
-
+	float alpha = isEditTile == TRUE ? 0.7f : 1.0f;
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
 	SetSpriteColor(g_VertexBuffer,
 		px, py, pw, ph,
 		tx, ty, tw, th,
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		XMFLOAT4(1.0f, 1.0f, 1.0f, alpha));
 
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
@@ -230,4 +229,5 @@ void SetTile(XMFLOAT3 pos)
 	//	}
 	//}
 }
+
 

@@ -172,7 +172,7 @@ void DrawField(void)
 			{
 				continue;
 			}
-			DrawTile(g_Field.field[i][j], pos);
+			DrawTile(g_Field.field[i][j], pos,FALSE);
 				
 		}
 	}
