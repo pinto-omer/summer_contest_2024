@@ -101,7 +101,7 @@ HRESULT InitEditor(void)
 
 
 
-
+	g_Load = TRUE;
 	return S_OK;
 }
 
@@ -153,20 +153,21 @@ void UpdateEditor(void)
 
 	// キー入力で移動 
 	{
-		if (GetKeyboardPress(DIK_DOWN) || IsButtonPressed(0, BUTTON_DOWN))
+		if (GetKeyboardRepeat(DIK_DOWN) || IsButtonPressed(0, BUTTON_DOWN))
 		{
+
 			g_Editor.pos.y += g_Editor.move.y;
 		}
-		else if (GetKeyboardPress(DIK_UP) || IsButtonPressed(0, BUTTON_UP))
+		else if (GetKeyboardRepeat(DIK_UP) || IsButtonPressed(0, BUTTON_UP))
 		{
 			g_Editor.pos.y -= g_Editor.move.y;
 		}
 
-		else if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
+		if (GetKeyboardRepeat(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
 		{
 			g_Editor.pos.x += g_Editor.move.x;
 		}
-		else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
+		else if (GetKeyboardRepeat(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
 		{
 			g_Editor.pos.x -= g_Editor.move.x;
 		}
@@ -191,8 +192,16 @@ void UpdateEditor(void)
 				LoadField(3);
 		}
 
-
-
+		else if (GetKeyboardRepeat(DIK_Q))
+		{
+			if (--g_Editor.texNo < 0)
+				g_Editor.texNo = TILE_MAX - 1;
+		}
+		else if (GetKeyboardRepeat(DIK_E))
+		{
+			if (++g_Editor.texNo >= TILE_MAX)
+				g_Editor.texNo = 0;
+		}
 
 
 
@@ -200,24 +209,26 @@ void UpdateEditor(void)
 		// MAP外チェック
 		BG* bg = GetBG();
 
+		float edge = (int)(bg->w / g_Editor.w) * g_Editor.w;
 		if (g_Editor.pos.x < 0)
 		{
 			g_Editor.pos.x = 0;
 		}
-
-		else if (g_Editor.pos.x > bg->w - (g_Editor.w))
+		
+		else if (g_Editor.pos.x > edge)
 		{
-			g_Editor.pos.x = bg->w - (g_Editor.w);
+			g_Editor.pos.x = edge;
 		}
 
+		edge = (int)(bg->h / g_Editor.h) * g_Editor.h;
 		if (g_Editor.pos.y < 0)
 		{
 			g_Editor.pos.y = 0;
 		}
 
-		else if (g_Editor.pos.y > bg->h - (g_Editor.h))
+		else if (g_Editor.pos.y >edge)
 		{
-			g_Editor.pos.y = bg->h - (g_Editor.h);
+			g_Editor.pos.y =  edge;
 		}
 
 
@@ -248,6 +259,15 @@ void UpdateEditor(void)
 //=============================================================================
 void DrawEditor(void)
 {
+	BG* bg = GetBG();
+
+	//プレイヤーの位置やテクスチャー座標を反映
+	float px = g_Editor.pos.x - bg->pos.x;	// プレイヤーの表示位置X
+	float py = g_Editor.pos.y - bg->pos.y;	// プレイヤーの表示位置Y
+	float pw = g_Editor.w;		// プレイヤーの表示幅
+	float ph = g_Editor.h;		// プレイヤーの表示高さ
+
+	DrawTile(g_Editor.texNo, XMFLOAT3(px + pw / 2.0f, py + ph / 2.0f, 0), TRUE);
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
@@ -265,20 +285,11 @@ void DrawEditor(void)
 	material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	SetMaterial(material);
 
-	BG* bg = GetBG();
 
 	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Editor.texNo]);
 
-	//プレイヤーの位置やテクスチャー座標を反映
-	float px = g_Editor.pos.x - bg->pos.x;	// プレイヤーの表示位置X
-	float py = g_Editor.pos.y - bg->pos.y;	// プレイヤーの表示位置Y
-	float pw = g_Editor.w;		// プレイヤーの表示幅
-	float ph = g_Editor.h;		// プレイヤーの表示高さ
-
-	//py += g_Editor.jumpY;		// ジャンプ中の高さを足す
-
-
+	
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
 
 	float tw = 1.0f;	// テクスチャの幅
 	float th = 1.0f;	// テクスチャの高さ
@@ -286,20 +297,12 @@ void DrawEditor(void)
 	float ty = 0.0f;	// テクスチャの左上Y座標
 
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+	SetSpriteLTColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
 		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
-
-	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-
-	// ポリゴン描画
-	GetDeviceContext()->Draw(4, 0);
 }
 
 

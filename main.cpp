@@ -23,7 +23,7 @@
 #include "file.h"
 
 #include "effect.h"
-
+#include "editor.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -310,6 +310,7 @@ void Update(void)
 		UpdateBG();
 		UpdateField();
 		UpdateEffect();
+		UpdateEditor();
 		break;
 	case MODE_GAME:			// ゲーム画面の更新
 		UpdateBG();
@@ -366,7 +367,12 @@ void Draw(void)
 	case MODE_TITLE:		// タイトル画面の描画
 		DrawTitle();
 		break;
-
+	case MODE_EDITOR:
+		DrawBG();
+		DrawField();
+		DrawEffect();
+		DrawEditor();
+		break;
 	case MODE_GAME:			// ゲーム画面の描画
 		DrawBG();
 		DrawField();
@@ -452,6 +458,7 @@ void SetMode(int mode)
 	// エフェクトの終了処理
 	UninitEffect();
 
+	UninitEditor();
 
 	g_Mode = mode;	// 次のモードをセットしている
 
@@ -466,6 +473,7 @@ void SetMode(int mode)
 		InitBG();
 		InitField();
 		InitEffect();
+		InitEditor();
 		break;
 	case MODE_GAME:
 		// ゲーム画面の初期化

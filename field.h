@@ -10,13 +10,14 @@
 #include "renderer.h"
 #include "debugproc.h"
 #include "sprite.h"
-
+#include "bg.h"
+#include "tile.h"
 //*****************************************************************************
 // É}ÉNÉçíËã`
 //*****************************************************************************
 
-#define FIELD_TILE_W				(40)
-#define FIELD_TILE_H				(20)
+#define FIELD_TILE_W				(BG_WIDTH / TILE_WIDTH + 1)
+#define FIELD_TILE_H				(BG_HEIGHT / TILE_HEIGHT + 1)
 
 
 struct FIELD

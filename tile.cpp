@@ -14,8 +14,8 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_WIDTH				(50)	// キャラサイズ
-#define TEXTURE_HEIGHT				(50)	// 
+#define TEXTURE_WIDTH				(TILE_WIDTH)	// キャラサイズ
+#define TEXTURE_HEIGHT				(TILE_HEIGHT)	// 
 #define TEXTURE_MAX					(TILE_MAX)		// テクスチャの数
 
 #define TEXTURE_PATTERN_DIVIDE_X	(1)		// アニメパターンのテクスチャ内分割数（X)

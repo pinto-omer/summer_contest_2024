@@ -270,14 +270,11 @@ void UpdatePlayer(void)
 					}
 				}
 				//field edit debug
-				else if (GetKeyboardTrigger(DIK_F2))
+				else if (GetKeyboardTrigger(DIK_F5))
 				{
-					SaveField(1);
+					SetMode(MODE_EDITOR);
 				}
-				else if (GetKeyboardTrigger(DIK_F3))
-				{
-					LoadField(1);
-				}
+				
 
 
 
