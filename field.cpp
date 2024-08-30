@@ -7,6 +7,7 @@
 #include "field.h"
 #include "tile.h"
 #include "bg.h"
+#include "file.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -36,6 +37,7 @@ static char* g_TexturName[TEXTURE_MAX] = {
 
 static BOOL	g_Load = FALSE;		// 初期化を行ったかのフラグ
 static FIELD	g_Field;
+static int fieldNum = 1;
 
 static int field1[FIELD_TILE_H][FIELD_TILE_W] =
 {
@@ -90,7 +92,7 @@ HRESULT InitField(void)
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	GetDevice()->CreateBuffer(&bd, NULL, &g_VertexBuffer);
 
-	memcpy(g_Field.field, field1, sizeof(g_Field.field));
+	//memcpy(g_Field.field, field1, sizeof(g_Field.field));
 	// 変数の初期化
 	
 	g_Field.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -102,6 +104,8 @@ HRESULT InitField(void)
 	InitTile();
 	g_Field.tile_w = GetTile()->w;
 	g_Field.tile_h = GetTile()->h;
+
+	LoadField(fieldNum);
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -185,6 +189,11 @@ void DrawField(void)
 FIELD* GetField(void)
 {
 	return &g_Field;
+}
+
+void SetField(int fieldNumber)
+{
+	fieldNum = fieldNumber;
 }
 
 int GetTileType(XMFLOAT3 pos)

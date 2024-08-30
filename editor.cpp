@@ -173,7 +173,7 @@ void UpdateEditor(void)
 		}
 
 		//field edit debug
-		else if (GetKeyboardPress(DIK_F2))
+		if (GetKeyboardPress(DIK_F2))
 		{
 			if (GetKeyboardTrigger(DIK_1))
 				SaveField(1);
@@ -192,7 +192,7 @@ void UpdateEditor(void)
 				LoadField(3);
 		}
 
-		else if (GetKeyboardRepeat(DIK_Q))
+		if (GetKeyboardRepeat(DIK_Q))
 		{
 			if (--g_Editor.texNo < 0)
 				g_Editor.texNo = TILE_MAX - 1;
@@ -202,7 +202,11 @@ void UpdateEditor(void)
 			if (++g_Editor.texNo >= TILE_MAX)
 				g_Editor.texNo = 0;
 		}
-
+		else if (GetKeyboardTrigger(DIK_SPACE))
+		{
+			FIELD* field = GetField();
+			field->field[(int)(g_Editor.pos.y / g_Editor.h)][(int)(g_Editor.pos.x / g_Editor.w)] = g_Editor.texNo;
+		}
 
 
 

@@ -42,6 +42,7 @@ void UpdateField(void);
 void DrawField(void);
 
 FIELD* GetField(void);
+void SetField(int fieldNumber);
 int GetTileType(XMFLOAT3 pos);
 XMFLOAT3 GetGroundBelow(XMFLOAT3 pos);
 

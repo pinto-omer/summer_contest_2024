@@ -270,9 +270,30 @@ void UpdatePlayer(void)
 					}
 				}
 				//field edit debug
-				else if (GetKeyboardTrigger(DIK_F5))
+				if (GetKeyboardTrigger(DIK_F5))
 				{
 					SetMode(MODE_EDITOR);
+				}
+				else if (GetKeyboardPress(DIK_F3))
+				{
+					if (GetKeyboardTrigger(DIK_1))
+					{
+						SetField(1);
+						SetMode(MODE_GAME);
+						return;
+					}
+					else if (GetKeyboardTrigger(DIK_2))
+					{
+						SetField(2);
+						SetMode(MODE_GAME);
+						return;
+					}
+					else if (GetKeyboardTrigger(DIK_3))
+					{
+						SetField(3);
+						SetMode(MODE_GAME);
+						return;
+					}
 				}
 				
 
