@@ -176,11 +176,20 @@ void UpdateEditor(void)
 		if (GetKeyboardPress(DIK_F2))
 		{
 			if (GetKeyboardTrigger(DIK_1))
+			{
 				SaveField(1);
+				SetField(1);
+			}
 			else if (GetKeyboardTrigger(DIK_2))
+			{
 				SaveField(2);
+				SetField(2);
+			}
 			else if (GetKeyboardTrigger(DIK_3))
+			{
 				SaveField(3);
+				SetField(3);
+			}
 		}
 		else if (GetKeyboardPress(DIK_F3))
 		{
@@ -190,6 +199,11 @@ void UpdateEditor(void)
 				LoadField(2);
 			else if (GetKeyboardTrigger(DIK_3))
 				LoadField(3);
+		}
+		else if (GetKeyboardTrigger(DIK_F5))
+		{
+			SetMode(MODE_GAME);
+			return;
 		}
 
 		if (GetKeyboardRepeat(DIK_Q))
@@ -218,7 +232,7 @@ void UpdateEditor(void)
 		{
 			g_Editor.pos.x = 0;
 		}
-		
+
 		else if (g_Editor.pos.x > edge)
 		{
 			g_Editor.pos.x = edge;
@@ -230,9 +244,9 @@ void UpdateEditor(void)
 			g_Editor.pos.y = 0;
 		}
 
-		else if (g_Editor.pos.y >edge)
+		else if (g_Editor.pos.y > edge)
 		{
-			g_Editor.pos.y =  edge;
+			g_Editor.pos.y = edge;
 		}
 
 
@@ -292,7 +306,7 @@ void DrawEditor(void)
 
 	// テクスチャ設定
 
-	
+
 	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
 
 	float tw = 1.0f;	// テクスチャの幅

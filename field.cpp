@@ -208,8 +208,8 @@ XMFLOAT3 GetGroundBelow(XMFLOAT3 pos)
 	j = (int)(pos.x / g_Field.tile_w);
 	while (i < FIELD_TILE_H && GetTile()[g_Field.field[i][j]].type != GROUND)
 		i++;
-	return XMFLOAT3(j * g_Field.tile_w - g_Field.tile_w,
-		i * g_Field.tile_h - g_Field.tile_h,
+	return XMFLOAT3(j * g_Field.tile_w /*- g_Field.tile_w*/,
+		i * g_Field.tile_h /*- g_Field.tile_h*/,
 		0);
 }
 
