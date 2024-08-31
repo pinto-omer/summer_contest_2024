@@ -12,6 +12,7 @@
 #include "sprite.h"
 #include "bg.h"
 #include "tile.h"
+#include "variabletile.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -22,7 +23,8 @@
 
 struct FIELD
 {
-	int field[FIELD_TILE_H][FIELD_TILE_W];
+	int			field[FIELD_TILE_H][FIELD_TILE_W];
+	XMINT2		varTilePos[MAX_VAR_TILES];
 	XMFLOAT3	pos;			// ポリゴンの座標
 	float		tile_w, tile_h;	// 幅と高さ
 	int			texNo;			// 使用しているテクスチャ番号

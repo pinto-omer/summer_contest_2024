@@ -166,17 +166,20 @@ void DrawField(void)
 		for (int j = 0; j < FIELD_TILE_W; j++)
 		{
 			// 画面外まで進んだ？
-			XMFLOAT3 pos = XMFLOAT3(j * tiles->w + tiles->w / 2.0f - bg->pos.x,
-				i * tiles->h + tiles->h / 2.0f - bg->pos.y,
+			float w, h;
+			h = tiles[g_Field.field[i][j]].h;
+			w = tiles[g_Field.field[i][j]].w;
+			XMFLOAT3 pos = XMFLOAT3(j * w + w / 2.0f - bg->pos.x,
+				i * h + h / 2.0f - bg->pos.y,
 				0);
-			if ((pos.y < (-tiles->h / 2.0f)) ||			// 自分の大きさを考慮して画面外か判定している
-				(pos.y > (bg->h +tiles->h / 2.0f)) ||
-				(pos.x < (-tiles->w / 2.0f)) ||
-				(pos.x > (bg->w + tiles->w / 2.0f)))
+			if ((pos.y < (-h / 2.0f)) ||			// 自分の大きさを考慮して画面外か判定している
+				(pos.y > (bg->h + h / 2.0f)) ||
+				(pos.x < (-w / 2.0f)) ||
+				(pos.x > (bg->w + w / 2.0f)))
 			{
 				continue;
 			}
-			DrawTile(g_Field.field[i][j], pos,FALSE);
+			DrawTile(g_Field.field[i][j], pos,FALSE,-1);
 				
 		}
 	}

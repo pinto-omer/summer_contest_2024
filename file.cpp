@@ -273,11 +273,13 @@ void LoadField(int id)
 		}
 
 		// 元々のチェックサムと再計算したチェックサムが同じか調べている
+#ifndef _DEBUG
 		if (sum != org)
 		{
 			// データが改ざんされている！
 			return;
 		}
+#endif
 	}
 
 	{	

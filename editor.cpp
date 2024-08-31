@@ -285,7 +285,7 @@ void DrawEditor(void)
 	float pw = g_Editor.w;		// プレイヤーの表示幅
 	float ph = g_Editor.h;		// プレイヤーの表示高さ
 
-	DrawTile(g_Editor.texNo, XMFLOAT3(px + pw / 2.0f, py + ph / 2.0f, 0), TRUE);
+	DrawTile(g_Editor.texNo, XMFLOAT3(px + pw / 2.0f, py + ph / 2.0f, 0), TRUE,-1);
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;

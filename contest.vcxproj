@@ -156,6 +156,7 @@
     <ClInclude Include="sprite.h" />
     <ClInclude Include="tile.h" />
     <ClInclude Include="title.h" />
+    <ClInclude Include="variabletile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bg.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="tile.cpp" />
     <ClCompile Include="title.cpp" />
+    <ClCompile Include="variabletile.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

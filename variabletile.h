@@ -1,3 +1,4 @@
+#pragma once
 //=============================================================================
 //
 // バレット処理 [tile.h]
@@ -14,43 +15,28 @@
 // マクロ定義
 //*****************************************************************************
 
-#define TILE_WIDTH	(50)
-#define TILE_HEIGHT	(50)
+#define MAX_VAR_TILES	(50)
 // バレット構造体
-struct TILE
+struct VARTILE
 {
-	float						w, h;				// 幅と高さ
-	int							countAnim;			// アニメーションカウント
-	int							patternAnim;		// アニメーションパターンナンバー
-	int							texNo;				// 何番目のテクスチャーを使用するのか
 	int							type;
-	BOOL						isVariable;
+	XMFLOAT3					pos;
+	XMFLOAT3					rot;
 };
 
 enum {//	TILE_PLAYER = -2,
-	TILE_EMPTY,
-	TILE_GROUND,
-	TILE_WALL,
+	V_MOVING,
+	V_DIRECTIONAL,
 
-	TILE_MAX
-};
-
-enum {
-	AIR,
-	SOLID,
-	GROUND,
-	MOVING,
-	DIRECTIONAL,
-	TILE_TYPE_MAX
+	V_MAX
 };
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-HRESULT InitTile(void);
-void UninitTile(void);
-void UpdateTile(void);
-void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile, int varTileID);
+HRESULT InitVariableTile(void);
+void UninitVariableTile(void);
+void UpdateVariableTile(void);
 
-TILE* GetTile(void);
-void SetTile(XMFLOAT3 pos);
+VARTILE* GetVarTile(void);
+//void SetTile(XMFLOAT3 pos);
 

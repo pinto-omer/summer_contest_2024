@@ -156,7 +156,7 @@ void UpdateTile(void)
 //=============================================================================
 // 描画処理
 //=============================================================================
-void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile)
+void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile, int varTileID)
 {
 	if (tileIDX < 0 || tileIDX >= TILE_MAX) return;
 	// 頂点バッファ設定
