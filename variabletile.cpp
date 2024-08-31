@@ -26,7 +26,7 @@
 //*****************************************************************************
 
 static BOOL		g_Load = FALSE;			// 初期化を行ったかのフラグ
-static VARTILE	g_VarTiles[MAX_VAR_TILES];	// バレット構造体
+static VARTILE	g_VarTiles[MAX_VAR_TILES+1];	// バレット構造体
 
 
 //=============================================================================
@@ -36,7 +36,7 @@ HRESULT InitVariableTile(void)
 {
 	
 		// バレット構造体の初期化
-	for (int i = 0; i < MAX_VAR_TILES; i++)
+	for (int i = 0; i < MAX_VAR_TILES + 1; i++)
 	{
 		g_VarTiles[i].type = V_MAX;
 		g_VarTiles[i].pos = XMFLOAT3(-1.0f,-1.0f,0.0f);
@@ -85,6 +85,12 @@ void UpdateVariableTile(void)
 VARTILE* GetVarTile(void)
 {
 	return g_VarTiles;
+}
+
+void resetEditorVarTile(int type)
+{
+	g_VarTiles[MAX_VAR_TILES].type = type;
+	g_VarTiles[MAX_VAR_TILES].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
 

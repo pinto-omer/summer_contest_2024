@@ -39,6 +39,8 @@ static char* g_TexturName[] = {
 	"",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_01.png",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_37.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_29.png",
+
 };
 
 static BOOL		g_Load = FALSE;			// ‰Šú‰»‚ğs‚Á‚½‚©‚Ìƒtƒ‰ƒO

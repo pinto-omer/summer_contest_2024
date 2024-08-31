@@ -38,5 +38,5 @@ void UninitVariableTile(void);
 void UpdateVariableTile(void);
 
 VARTILE* GetVarTile(void);
-//void SetTile(XMFLOAT3 pos);
+void resetEditorVarTile(int type);
 
