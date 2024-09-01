@@ -33,8 +33,8 @@
 // ジャンプ処理
 #define	PLAYER_JUMP_CNT_MAX			(45)		// 30フレームで着地する
 #define	PLAYER_JUMP_Y_MAX			(150.0f)	// ジャンプの高さ
-
-
+#define PLAYER_JUMP_GRAVITY			(0.5f)
+#define PLAYER_MAX_FALL_SPEED		(15.0f)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -133,6 +133,7 @@ HRESULT InitPlayer(void)
 		g_Player[i].jumpCnt = 0;
 		g_Player[i].jumpY = 0.0f;
 		g_Player[i].jumpYMax = PLAYER_JUMP_Y_MAX;
+		g_Player[i].fallSpeed = 0.0f;
 
 		// 分身用
 		g_Player[i].dash = FALSE;
@@ -249,8 +250,21 @@ void UpdatePlayer(void)
 
 				if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
 				{
-					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 4.0f, g_Player[i].pos.y, 0));
-					if (tile == AIR)
+					BOOL collided = FALSE;
+					float height = g_Player[i].h;
+					float y = g_Player[i].pos.y - height / 2.0f;
+					while (height > 0)
+					{
+						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 4.0f, y, 0));
+						if (tileType != AIR)
+						{
+							collided = TRUE;
+							break;
+						}
+						height -= TILE_HEIGHT;
+						y += TILE_HEIGHT;
+					}
+					if (!collided)
 					{
 						g_Player[i].pos.x += speed;
 						g_Player[i].dir = CHAR_DIR_RIGHT;
@@ -260,8 +274,22 @@ void UpdatePlayer(void)
 				}
 				else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
 				{
-					int tile = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 4.0f, g_Player[i].pos.y, 0));
-					if (tile == AIR)
+					BOOL collided = FALSE;
+					float height = g_Player[i].h;
+					float y = g_Player[i].pos.y - height / 2.0f;
+					while (height > 0)
+					{
+						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 4.0f, y, 0));
+						if (tileType != AIR)
+						{
+							collided = TRUE;
+							break;
+						}
+						height -= TILE_HEIGHT;
+						y += TILE_HEIGHT;
+					}
+
+					if (!collided)
 					{
 						g_Player[i].pos.x -= speed;
 						g_Player[i].dir = CHAR_DIR_LEFT;
@@ -329,16 +357,12 @@ void UpdatePlayer(void)
 				// ジャンプ処理中？
 				if (g_Player[i].jump == TRUE)
 				{
-					/*float angle = (XM_PI / PLAYER_JUMP_CNT_MAX) * g_Player[i].jumpCnt;
-					float y = g_Player[i].jumpYMax * cosf(XM_PI / 2 + angle);
-					g_Player[i].pos.y = g_Player[i].jumpY + y;*/
+
 					float angle = (XM_PI / PLAYER_JUMP_CNT_MAX) * g_Player[i].jumpCnt;
 					float y = g_Player[i].jumpYMax * cosf(XM_PI / 2 + angle);
-					if (y - g_Player[i].jumpY > g_Player[i].jumpYMax / 12.5f)
-						g_Player[i].pos.y += g_Player[i].jumpYMax / 12.5f;
-					else
-					{
 
+					if (g_Player[i].jumpCnt <= PLAYER_JUMP_CNT_MAX / 2)
+					{
 						g_Player[i].pos.y += y - g_Player[i].jumpY;
 						g_Player[i].jumpY = y;
 						if (GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y - g_Player[i].h / 2.0f, 0)) != AIR)
@@ -348,6 +372,13 @@ void UpdatePlayer(void)
 							g_Player[i].jumpY = 0;
 						}
 					}
+					else
+					{
+						g_Player[i].pos.y += g_Player[i].fallSpeed;
+						if (g_Player[i].fallSpeed < PLAYER_MAX_FALL_SPEED)
+							g_Player[i].fallSpeed += PLAYER_JUMP_GRAVITY;
+
+					}
 					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2 &&
 						GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == GROUND)
 					{
@@ -355,19 +386,14 @@ void UpdatePlayer(void)
 						g_Player[i].jump = FALSE;
 						g_Player[i].jumpCnt = 0;
 						g_Player[i].jumpY = 0.0f;
+						g_Player[i].fallSpeed = 0.0f;
 					}
 					else
 					{
-
-						g_Player[i].jumpCnt++;
-						if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX)
+						if (g_Player[i].jumpCnt < PLAYER_JUMP_CNT_MAX)
+							g_Player[i].jumpCnt++;
+						if (g_Player[i].jumpCnt >= PLAYER_JUMP_CNT_MAX)
 							g_Player[i].jumpY = 0;
-						if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX + PLAYER_JUMP_CNT_MAX / 10)
-						{
-							g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX + PLAYER_JUMP_CNT_MAX / 10;
-							//g_Player[i].jumpY+=g_Player[i].jumpYMax / 10.0f;
-						}
-
 					}
 
 				}
