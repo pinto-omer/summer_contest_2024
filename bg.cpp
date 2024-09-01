@@ -28,9 +28,10 @@ static ID3D11Buffer				*g_VertexBuffer = NULL;		// 頂点情報
 static ID3D11ShaderResourceView	*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char *g_TexturName[TEXTURE_MAX] = {
-	"data/TEXTURE/craftpix_free_green_zone/BGs/Day/Background.png",//"data/TEXTURE/map.png",
+	"data/TEXTURE/craftpix_free_green_zone/BGs/Night/1.png",//"data/TEXTURE/map.png",
+	"data/TEXTURE/craftpix_free_green_zone/BGs/Night/5.png",
 	"data/TEXTURE/sky000.jpg",
-	"data/TEXTURE/sky001.jpg",
+	//"data/TEXTURE/sky001.jpg",
 };
 
 
@@ -152,10 +153,23 @@ void DrawBG(void)
 		// テクスチャ設定
 		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_BG.texNo]);
 
+		
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
 		SetSpriteLTColor(g_VertexBuffer,
 			0 - g_BG.pos.x, 0 - g_BG.pos.y, g_BG.w, g_BG.h,
-			0.0f, 0.0f, 1.0f, 1.0f,
+			0.0f, 0.0f, 5.0f, 1.0f,
+			XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		// ポリゴン描画
+		GetDeviceContext()->Draw(4, 0);
+
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[1]);
+
+
+		// １枚のポリゴンの頂点とテクスチャ座標を設定
+		SetSpriteLTColor(g_VertexBuffer,
+			0 - g_BG.pos.x, g_BG.h * 0.15f - g_BG.pos.y, g_BG.w, g_BG.h * 0.85f,
+			0.0f, 0.0f, 5.0f, 1.0f,
 			XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 		// ポリゴン描画
