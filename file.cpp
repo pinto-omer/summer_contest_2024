@@ -11,7 +11,6 @@
 #include "file.h"
 #include "score.h"
 #include "field.h"
-
 /*******************************************************************************
 * マクロ定義
 *******************************************************************************/
@@ -197,6 +196,8 @@ void SaveField(int id)
 	{	
 		FIELD* field = GetField();
 		memcpy(sField.field, field->field, sizeof(sField.field));
+		memcpy(sField.varTilePos, field->varTilePos, sizeof(sField.varTilePos));
+		memcpy(sField.varTiles, GetVarTile(), sizeof(sField.varTiles));
 	}
 
 	// セーブデータのチェックサムを求める
@@ -286,8 +287,9 @@ void LoadField(int id)
 		
 		FIELD* field = GetField();
 		memcpy(field->field, sField.field, sizeof(sField.field));
-		
-		
+		memcpy(field->varTilePos, sField.varTilePos, sizeof(sField.varTilePos));
+		memcpy(GetVarTile(), sField.varTiles, sizeof(sField.varTiles));
+		FindLastVarTileIDX();
 	}
 
 	

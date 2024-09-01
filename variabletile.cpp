@@ -27,7 +27,7 @@ int GetVarType(int tileType);
 //*****************************************************************************
 
 static BOOL		g_Load = FALSE;			// 初期化を行ったかのフラグ
-static VARTILE	g_VarTiles[MAX_VAR_TILES+1];	// バレット構造体
+static VARTILE	g_VarTiles[MAX_VAR_TILES + 1];	// バレット構造体
 static int		lastIDX;
 
 //=============================================================================
@@ -35,13 +35,13 @@ static int		lastIDX;
 //=============================================================================
 HRESULT InitVariableTile(void)
 {
-	
-		// バレット構造体の初期化
+
+	// バレット構造体の初期化
 	for (int i = 0; i < MAX_VAR_TILES + 1; i++)
 	{
 		g_VarTiles[i].type = V_MAX;
-		g_VarTiles[i].pos = XMFLOAT3(-1.0f,-1.0f,0.0f);
-		g_VarTiles[i].rot = XMFLOAT3(0.0f,0.0f,0.0f);
+		g_VarTiles[i].pos = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+		g_VarTiles[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	}
 
@@ -129,6 +129,15 @@ int GetVarType(int tileType)
 
 }
 
+void FindLastVarTileIDX(void)
+{
+	lastIDX = -1;
+	for (int i = 0; i < MAX_VAR_TILES; i++)
+	{
+		if (g_VarTiles[i].type == V_MAX) break;
+		lastIDX++;
+	}
+}
 //=============================================================================
 // バレットの発射設定
 //=============================================================================

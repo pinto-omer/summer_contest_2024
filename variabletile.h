@@ -41,3 +41,4 @@ VARTILE* GetVarTile(void);
 void ResetEditorVarTile(int tileIDX);
 int AddVarTile(void);
 void RemoveVarTile(int idx);
+void FindLastVarTileIDX(void);

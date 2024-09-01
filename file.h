@@ -11,6 +11,8 @@
 #include "enemy.h"
 #include "score.h"
 #include "field.h"
+#include "variabletile.h"
+
 /*******************************************************************************
 * マクロ定義
 *******************************************************************************/
@@ -38,9 +40,10 @@ struct	SAVEDATA				// セーブデータの構造体
 
 struct SAVEFIELD
 {
-	int field[FIELD_TILE_H][FIELD_TILE_W];
-
-	int sum;
+	int			field[FIELD_TILE_H][FIELD_TILE_W];
+	XMINT2		varTilePos[MAX_VAR_TILES];
+	VARTILE		varTiles[MAX_VAR_TILES];
+	int			sum;
 };
 
 /*******************************************************************************
