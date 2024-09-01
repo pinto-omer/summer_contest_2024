@@ -178,28 +178,28 @@ void UpdateEditor(void)
 			VARTILE* vartile = &GetVarTile()[MAX_VAR_TILES];
 			if (GetKeyboardTrigger(DIK_W))
 			{
-				if (vartile->type == V_DIRECTIONAL)
+				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 0.0f;
 				}
 			}
 			else if (GetKeyboardTrigger(DIK_S))
 			{
-				if (vartile->type == V_DIRECTIONAL)
+				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 3.14f;
 				}
 			}
 			else if (GetKeyboardTrigger(DIK_A))
 			{
-				if (vartile->type == V_DIRECTIONAL)
+				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 3.14f * 1.5f;
 				}
 			}
 			else if (GetKeyboardTrigger(DIK_D))
 			{
-				if (vartile->type == V_DIRECTIONAL)
+				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 3.14f * 0.5f;
 				}

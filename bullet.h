@@ -40,7 +40,7 @@ void UninitBullet(void);
 void UpdateBullet(void);
 void DrawBullet(void);
 
-BULLET *GetBullet(void);
-void SetBullet(XMFLOAT3 pos);
+BULLET* GetBullet(void);
+BULLET* SetBullet(XMFLOAT3 pos);
 
 

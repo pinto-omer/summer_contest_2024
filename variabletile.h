@@ -10,6 +10,7 @@
 #include "main.h"
 #include "renderer.h"
 #include "sprite.h"
+#include "bullet.h"
 
 //*****************************************************************************
 // É}ÉNÉçíËã`
@@ -22,11 +23,12 @@ struct VARTILE
 	int							type;
 	XMFLOAT3					pos;
 	XMFLOAT3					rot;
+	BULLET*						bullet;
 };
 
 enum {//	TILE_PLAYER = -2,
 	V_MOVING,
-	V_DIRECTIONAL,
+	V_DIRECTIONAL_TRAP,
 
 	V_MAX
 };

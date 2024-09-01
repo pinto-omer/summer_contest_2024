@@ -42,7 +42,7 @@ HRESULT InitVariableTile(void)
 		g_VarTiles[i].type = V_MAX;
 		g_VarTiles[i].pos = XMFLOAT3(-1.0f, -1.0f, 0.0f);
 		g_VarTiles[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
+		g_VarTiles[i].bullet = NULL;
 	}
 
 	lastIDX = -1;
@@ -57,6 +57,8 @@ HRESULT InitVariableTile(void)
 void UninitVariableTile(void)
 {
 	if (g_Load == FALSE) return;
+
+	g_Load = FALSE;
 }
 
 //=============================================================================
@@ -64,13 +66,38 @@ void UninitVariableTile(void)
 //=============================================================================
 void UpdateVariableTile(void)
 {
-	if (g_Load == FALSE) return;
+	if (g_Load == FALSE || GetMode() != MODE_GAME) return;
 
 	for (int i = 0; i < MAX_VAR_TILES; i++)
 	{
-		// アニメーション  
 		if (g_VarTiles[i].type == V_MAX) break;
 
+		if (g_VarTiles[i].type == V_DIRECTIONAL_TRAP)
+		{
+			if (g_VarTiles[i].bullet == NULL)
+			{
+				XMFLOAT3 bulPos = g_VarTiles[i].pos;
+				bulPos.x += TILE_WIDTH / 2.0f;
+				bulPos.y += TILE_HEIGHT / 2.0f;
+				float speedV = 0.0f, speedH = 0.0f;
+				if (g_VarTiles[i].rot.z == 0.0f || g_VarTiles[i].rot.z == 3.14f)
+				{
+					speedV = (g_VarTiles[i].rot.z == 0.0f ? -1.0f : 1.0f) * BULLET_SPEED;
+					
+				}
+				else
+				{
+					speedH = (g_VarTiles[i].rot.z == 3.14f * 1.5f ? -1.0f : 1.0f) * BULLET_SPEED;
+				}
+				g_VarTiles[i].bullet = SetBullet(bulPos);
+				g_VarTiles[i].bullet->rot = g_VarTiles[i].rot;
+				g_VarTiles[i].bullet->move = XMFLOAT3(speedH, speedV, 0.0f);
+			}
+			else if (g_VarTiles[i].bullet->use == FALSE)
+			{
+				g_VarTiles[i].bullet = NULL;
+			}
+		}
 	}
 
 
@@ -122,7 +149,7 @@ int GetVarType(int tileType)
 	switch (tileType)
 	{
 	case TILE_TRAP:
-		return V_DIRECTIONAL;
+		return V_DIRECTIONAL_TRAP;
 	default:
 		return V_MAX;
 	}
