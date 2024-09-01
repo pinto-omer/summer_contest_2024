@@ -50,6 +50,7 @@ static char* g_TexturName[TEXTURE_MAX] = {
 static int animPatternNum[TEXTURE_MAX] = { 0 };
 
 static BOOL		g_Load = FALSE;				// 初期化を行ったかのフラグ
+static BOOL		isVarTile;
 static EDITOR	g_Editor;		// プレイヤー構造体
 
 
@@ -89,7 +90,7 @@ HRESULT InitEditor(void)
 	g_Editor.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);	// 中心点から表示
 	g_Editor.w = TEXTURE_WIDTH;
 	g_Editor.h = TEXTURE_HEIGHT;
-	g_Editor.texNo = 0;
+	g_Editor.texNo = TILE_EMPTY;
 
 	g_Editor.countAnim = 0;
 	g_Editor.patternAnim = 0;
@@ -97,7 +98,7 @@ HRESULT InitEditor(void)
 	g_Editor.move = XMFLOAT3(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0.0f);		// 移動量
 	g_Editor.patternAnim = 0;// g_Editor.dir* TEXTURE_PATTERN_DIVIDE_X;
 
-
+	isVarTile = FALSE;
 
 
 
@@ -172,6 +173,39 @@ void UpdateEditor(void)
 			g_Editor.pos.x -= g_Editor.move.x;
 		}
 
+		if (isVarTile)
+		{
+			VARTILE* vartile = &GetVarTile()[MAX_VAR_TILES];
+			if (GetKeyboardTrigger(DIK_W))
+			{
+				if (vartile->type == V_DIRECTIONAL)
+				{
+					vartile->rot.z = 0.0f;
+				}
+			}
+			else if (GetKeyboardTrigger(DIK_S))
+			{
+				if (vartile->type == V_DIRECTIONAL)
+				{
+					vartile->rot.z = 3.14f;
+				}
+			}
+			else if (GetKeyboardTrigger(DIK_A))
+			{
+				if (vartile->type == V_DIRECTIONAL)
+				{
+					vartile->rot.z = 3.14f * 1.5f;
+				}
+			}
+			else if (GetKeyboardTrigger(DIK_D))
+			{
+				if (vartile->type == V_DIRECTIONAL)
+				{
+					vartile->rot.z = 3.14f * 0.5f;
+				}
+			}
+		}
+
 		//field edit debug
 		if (GetKeyboardPress(DIK_F2))
 		{
@@ -210,16 +244,40 @@ void UpdateEditor(void)
 		{
 			if (--g_Editor.texNo < 0)
 				g_Editor.texNo = TILE_MAX - 1;
+			TILE tile = GetTile()[g_Editor.texNo];
+			isVarTile = tile.isVariable;
+			if (tile.isVariable == TRUE)
+			{
+				ResetEditorVarTile(g_Editor.texNo);
+			}
 		}
 		else if (GetKeyboardRepeat(DIK_E))
 		{
 			if (++g_Editor.texNo >= TILE_MAX)
 				g_Editor.texNo = 0;
+			TILE tile = GetTile()[g_Editor.texNo];
+			isVarTile = tile.isVariable;
+			if (tile.isVariable == TRUE)
+			{
+				ResetEditorVarTile(g_Editor.texNo);
+			}
 		}
 		else if (GetKeyboardTrigger(DIK_SPACE))
 		{
 			FIELD* field = GetField();
-			field->field[(int)(g_Editor.pos.y / g_Editor.h)][(int)(g_Editor.pos.x / g_Editor.w)] = g_Editor.texNo;
+			int row, col;
+			row = (int)(g_Editor.pos.y / g_Editor.h);
+			col = (int)(g_Editor.pos.x / g_Editor.w);
+			if (GetTile()[field->field[row][col]].isVariable == TRUE)
+				RemoveVarTile(getVarTileIDAtPos(XMINT2(row, col)));
+			field->field[row][col] = g_Editor.texNo;
+			if (isVarTile == TRUE)
+			{
+				VARTILE* vartiles = GetVarTile();
+				int varTileIDX = AddVarTile();
+				vartiles[varTileIDX] = vartiles[MAX_VAR_TILES];
+				field->varTilePos[varTileIDX] = XMINT2(row, col);
+			}
 		}
 
 
@@ -250,7 +308,10 @@ void UpdateEditor(void)
 		}
 
 
-
+		if (isVarTile == TRUE)
+		{
+			GetVarTile()[MAX_VAR_TILES].pos = g_Editor.pos;
+		}
 		// プレイヤーの立ち位置からMAPのスクロール座標を計算する
 		bg->pos.x = g_Editor.pos.x - EDITOR_DISP_X;
 		if (bg->pos.x < 0) bg->pos.x = 0;
@@ -285,7 +346,7 @@ void DrawEditor(void)
 	float pw = g_Editor.w;		// プレイヤーの表示幅
 	float ph = g_Editor.h;		// プレイヤーの表示高さ
 
-	DrawTile(g_Editor.texNo, XMFLOAT3(px + pw / 2.0f, py + ph / 2.0f, 0), TRUE,-1);
+	DrawTile(g_Editor.texNo, XMFLOAT3(px + pw / 2.0f, py + ph / 2.0f, 0), TRUE, isVarTile == TRUE ? MAX_VAR_TILES : -1);
 	// 頂点バッファ設定
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;

@@ -21,7 +21,6 @@
 // プロトタイプ宣言
 //*****************************************************************************
 
-
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
@@ -94,6 +93,8 @@ HRESULT InitField(void)
 
 	//memcpy(g_Field.field, field1, sizeof(g_Field.field));
 	// 変数の初期化
+	for (int i = 0; i < MAX_VAR_TILES; i++)
+		g_Field.varTilePos[i] = XMINT2(-1, -1);
 	
 	g_Field.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	g_Field.texNo = 0;
@@ -102,9 +103,10 @@ HRESULT InitField(void)
 	g_Field.scrl2 = 0.0f;		// TEXスクロール
 	
 	InitTile();
+	InitVariableTile();
 	g_Field.tile_w = GetTile()->w;
 	g_Field.tile_h = GetTile()->h;
-
+	
 	LoadField(fieldNum);
 	g_Load = TRUE;
 	return S_OK;
@@ -131,8 +133,9 @@ void UninitField(void)
 			g_Texture[i] = NULL;
 		}
 	}
-
+	UninitVariableTile();
 	UninitTile();
+
 	g_Load = FALSE;
 }
 
@@ -147,6 +150,7 @@ void UpdateField(void)
 	//g_Field.scrl -= 0.0f;		// 0.005f;		// スクロール
 
 	UpdateTile();
+	UpdateVariableTile();
 #ifdef _DEBUG	// デバッグ情報を表示する
 
 
@@ -179,7 +183,10 @@ void DrawField(void)
 			{
 				continue;
 			}
-			DrawTile(g_Field.field[i][j], pos,FALSE,-1);
+			if (tiles[g_Field.field[i][j]].isVariable == FALSE)
+				DrawTile(g_Field.field[i][j], pos,FALSE,-1);
+			else
+				DrawTile(g_Field.field[i][j], pos, FALSE, getVarTileIDAtPos(XMINT2(i,j)));
 				
 		}
 	}
@@ -216,6 +223,16 @@ XMFLOAT3 GetGroundBelow(XMFLOAT3 pos)
 		0);
 }
 
+int getVarTileIDAtPos(XMINT2 pos)
+{
+	for (int i = 0; i < MAX_VAR_TILES; i++)
+	{
+		if (g_Field.varTilePos[i].x == pos.x &&
+			g_Field.varTilePos[i].y == pos.y)
+			return i;
+	}
+	return -1;
+}
 
 
 

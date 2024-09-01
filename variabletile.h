@@ -38,5 +38,6 @@ void UninitVariableTile(void);
 void UpdateVariableTile(void);
 
 VARTILE* GetVarTile(void);
-void resetEditorVarTile(int type);
-
+void ResetEditorVarTile(int tileIDX);
+int AddVarTile(void);
+void RemoveVarTile(int idx);

@@ -11,6 +11,7 @@
 #include "bg.h"
 #include "effect.h"
 #include "editor.h"
+#include "variabletile.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -86,11 +87,15 @@ HRESULT InitTile(void)
 		g_Tile[i].countAnim = 0;
 		g_Tile[i].patternAnim = 0;
 		g_Tile[i].type = SOLID;
+		g_Tile[i].isVariable = FALSE;
 	}
 
 	g_Tile[TILE_EMPTY].type = AIR;
+
 	g_Tile[TILE_GROUND].type = GROUND;
 
+	g_Tile[TILE_TRAP].type = GROUND;
+	g_Tile[TILE_TRAP].isVariable = TRUE;
 
 	g_Load = TRUE;
 	return S_OK;
@@ -178,7 +183,7 @@ void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile, int varTileID)
 	material.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	SetMaterial(material);
 
-	
+
 
 	// テクスチャ設定
 	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Tile[tileIDX].texNo]);
@@ -195,11 +200,23 @@ void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile, int varTileID)
 	float ty = (float)(g_Tile[tileIDX].patternAnim / TEXTURE_PATTERN_DIVIDE_X) * th;	// テクスチャの左上Y座標
 	float alpha = isEditTile == TRUE ? 0.7f : 1.0f;
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer,
-		px, py, pw, ph,
-		tx, ty, tw, th,
-		XMFLOAT4(1.0f, 1.0f, 1.0f, alpha));
-
+	if (varTileID == -1)
+		SetSpriteColor(g_VertexBuffer,
+			px, py, pw, ph,
+			tx, ty, tw, th,
+			XMFLOAT4(1.0f, 1.0f, 1.0f, alpha));
+	else
+	{
+		VARTILE vartile = GetVarTile()[varTileID];
+		BG* bg = GetBG();
+		px = vartile.pos.x + pw / 2.0f - bg->pos.x;
+		py = vartile.pos.y + ph / 2.0f - bg->pos.y;
+		SetSpriteColorRotation(g_VertexBuffer,
+			px, py, pw, ph,
+			tx, ty, tw, th,
+			XMFLOAT4(1.0f, 1.0f, 1.0f, alpha),
+			vartile.rot.z);
+	}
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 
