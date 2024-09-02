@@ -5,7 +5,7 @@
 //
 //=============================================================================
 #include "bullet.h"
-#include "enemy.h"
+#include "player.h"
 #include "collision.h"
 #include "score.h"
 #include "bg.h"
@@ -19,7 +19,7 @@
 #define TEXTURE_HEIGHT				(50)	// 
 #define TEXTURE_WIDTH				(TEXTURE_HEIGHT / 3)	// キャラサイズ
 #define TEXTURE_MAX					(1)		// テクスチャの数
-
+#define TIP_SIZE					(TEXTURE_HEIGHT / 5)
 #define TEXTURE_PATTERN_DIVIDE_X	(1)		// アニメパターンのテクスチャ内分割数（X)
 #define TEXTURE_PATTERN_DIVIDE_Y	(1)		// アニメパターンのテクスチャ内分割数（Y)
 #define ANIM_PATTERN_NUM			(TEXTURE_PATTERN_DIVIDE_X*TEXTURE_PATTERN_DIVIDE_Y)	// アニメーションパターン数
@@ -181,27 +181,54 @@ void UpdateBullet(void)
 				//		}
 				//	}
 				//}
-
-				FIELD* field = GetField();
-
-				int x = (int)(g_Bullet[i].pos.x / field->tile_w);
-				int y = (int)(g_Bullet[i].pos.y / field->tile_h);
-				if (g_Bullet[i].move.x != 0)
-					x += g_Bullet[i].move.x > 0 ? 1 : -1;
-				else
-					y += g_Bullet[i].move.y > 0 ? 1 : -1;
-				if (x < 0 || x >= FIELD_TILE_W || y < 0 || y > FIELD_TILE_H)
+				
+				// フィールドとの当たり判定
 				{
-					g_Bullet[i].use = FALSE;
-					continue;
+					FIELD* field = GetField();
+
+					int x = (int)(g_Bullet[i].pos.x / field->tile_w);
+					int y = (int)(g_Bullet[i].pos.y / field->tile_h);
+					if (g_Bullet[i].move.x != 0)
+						x += g_Bullet[i].move.x > 0 ? 1 : -1;
+					else
+						y += g_Bullet[i].move.y > 0 ? 1 : -1;
+					if (x < 0 || x >= FIELD_TILE_W || y < 0 || y > FIELD_TILE_H)
+					{
+						g_Bullet[i].use = FALSE;
+						continue;
+					}
+					TILE tile = GetTile()[field->field[y][x]];
+					if (tile.type != TILE_EMPTY &&
+						CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
+							XMFLOAT3(x * tile.w + tile.w / 2.0f, y * tile.h + tile.h / 2.0f, 0.0f), tile.w, tile.h) == TRUE)
+					{
+						g_Bullet[i].use = FALSE;
+						continue;
+					}
 				}
-				TILE tile = GetTile()[field->field[y][x]];
-				if (tile.type != TILE_EMPTY &&
-					CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
-						XMFLOAT3(x * tile.w + tile.w / 2.0f, y * tile.h + tile.h / 2.0f, 0.0f), tile.w, tile.h) == TRUE)
+
+				// プレイヤーとの当たり判定
 				{
-					g_Bullet[i].use = FALSE;
-					continue;
+					PLAYER* player = GetPlayer();
+					float tipAdjust = (g_Bullet[i].h - TIP_SIZE) * 0.5f;
+					XMFLOAT3 tipPos = g_Bullet[i].pos;
+					if (g_Bullet[i].move.x != 0)
+					{
+						tipAdjust *= g_Bullet[i].move.x > 0 ? 1 : -1;
+						tipPos.x += tipAdjust;
+
+						if (CollisionBB(g_Bullet[i].pos,  TIP_SIZE * 0.5f, g_Bullet[i].w * 0.5f,
+							player->pos, player->w*0.5f, player->h) == TRUE)
+							g_Bullet[i].use = FALSE;
+					}
+					else
+					{
+						tipAdjust *= g_Bullet[i].move.y > 0 ? 1 : -1;
+						tipPos.y += tipAdjust;
+						if (CollisionBB(tipPos, g_Bullet[i].w * 0.5f, TIP_SIZE * 0.5f,
+							player->pos, player->w * 0.5f, player->h * 0.5f) == TRUE)
+							g_Bullet[i].use = FALSE;
+					}
 				}
 			}
 
