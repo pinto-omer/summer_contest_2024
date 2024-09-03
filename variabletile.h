@@ -24,6 +24,8 @@ struct VARTILE
 	XMFLOAT3					pos;
 	XMFLOAT3					rot;
 	BULLET*						bullet;
+	int							cooldown;
+	BOOL						frozen;
 };
 
 enum {//	TILE_PLAYER = -2,
