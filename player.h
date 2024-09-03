@@ -10,7 +10,7 @@
 #include "renderer.h"
 #include "debugproc.h"
 #include "sprite.h"
-
+#include "tile.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -18,6 +18,8 @@
 
 #define	PLAYER_OFFSET_CNT	(16)	// 16分身
 
+#define FREEZE_MAX_DIAMETER	(TILE_WIDTH * 10.0f)
+#define	FREEZE_DURATION		(300)	//freeze duration in frames
 enum
 {
 	//CHAR_DIR_UP,
@@ -55,6 +57,10 @@ struct PLAYER
 	int			jumpCnt;		// ジャンプ中のカウント
 	float		jumpYMax;		// 
 	float		fallSpeed;
+
+	BOOL		freeze;
+	XMFLOAT3	freezePos;
+	float		freezeRadius;
 };
 
 

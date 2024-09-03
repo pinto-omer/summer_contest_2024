@@ -28,7 +28,8 @@ struct BULLET
 	int					countAnim;			// アニメーションカウント
 	int					patternAnim;		// アニメーションパターンナンバー
 	int					texNo;				// 何番目のテクスチャーを使用するのか
-
+	BOOL				frozen;
+	int					freezeRemaining;
 };
 
 

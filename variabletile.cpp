@@ -43,8 +43,9 @@ HRESULT InitVariableTile(void)
 		g_VarTiles[i].pos = XMFLOAT3(-1.0f, -1.0f, 0.0f);
 		g_VarTiles[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		g_VarTiles[i].bullet = NULL;
-		g_VarTiles[i].cooldown = 0.0f;
+		g_VarTiles[i].cooldown = 0;
 		g_VarTiles[i].frozen = FALSE;
+		g_VarTiles[i].pressed = FALSE;
 	}
 
 	lastIDX = -1;

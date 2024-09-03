@@ -17,7 +17,9 @@
 //*****************************************************************************
 
 #define MAX_VAR_TILES	(50)
-// バレット構造体
+// VARTILE構造体
+// in order to not break field save data, when adding new members
+// ALWAYS add them to the end of the struct. member deletion is not supported
 struct VARTILE
 {
 	int							type;
@@ -26,6 +28,7 @@ struct VARTILE
 	BULLET*						bullet;
 	int							cooldown;
 	BOOL						frozen;
+	BOOL						pressed;
 };
 
 enum {//	TILE_PLAYER = -2,

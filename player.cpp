@@ -19,8 +19,9 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(128)	// キャラサイズ
 #define TEXTURE_HEIGHT				(70)	// 
-#define TEXTURE_MAX					(CHAR_DIR_MAX+1)		// テクスチャの数
-
+#define TEXTURE_MAX					(CHAR_DIR_MAX+2)		// テクスチャの数
+#define FREEZE_TEXTURE				(CHAR_DIR_MAX+1)
+#define FREEZE_FRAME_COUNT			(30)
 //#define TEXTURE_PATTERN_DIVIDE_X	(3)		// アニメパターンのテクスチャ内分割数（X)
 //#define TEXTURE_PATTERN_DIVIDE_Y	(4)		// アニメパターンのテクスチャ内分割数（Y)
 //#define ANIM_PATTERN_NUM			(TEXTURE_PATTERN_DIVIDE_X*TEXTURE_PATTERN_DIVIDE_Y)	// アニメーションパターン数
@@ -51,7 +52,8 @@ static char* g_TexturName[TEXTURE_MAX] = {
 	"data/TEXTURE/Enchantress/walk_right.png",
 	"data/TEXTURE/Enchantress/walk_left.png",
 	"data/TEXTURE/Enchantress/idle.png",
-	"data/TEXTURE/shadow000.jpg"
+	"data/TEXTURE/shadow000.jpg",
+	"data/TEXTURE/circle.png"
 };
 
 static int texturePatternDivideX[TEXTURE_MAX] = {
@@ -405,7 +407,23 @@ void UpdatePlayer(void)
 					g_Player[i].jumpY = 0;// g_Player[i].pos.y;
 				}
 
-
+				if (!g_Player[i].moving && !g_Player[i].jump && !g_Player[i].freeze)
+				{
+					if (GetKeyboardTrigger(DIK_X))
+					{
+						g_Player[i].freeze = TRUE;
+						g_Player[i].freezePos = g_Player[i].pos;
+						g_Player[i].freezeRadius = 1.0f / FREEZE_FRAME_COUNT;
+					}
+				}
+				else if (g_Player[i].freeze)
+				{
+					if (g_Player[i].freezeRadius < 1.0f)
+						g_Player[i].freezeRadius += 1.0f / FREEZE_FRAME_COUNT;
+					else
+						g_Player[i].freeze = false;
+					
+				}
 				// MAP外チェック
 				BG* bg = GetBG();
 
@@ -483,11 +501,6 @@ void UpdatePlayer(void)
 	}
 
 
-	// 現状をセーブする
-	if (GetKeyboardTrigger(DIK_S))
-	{
-		SaveData();
-	}
 
 
 #ifdef _DEBUG	// デバッグ情報を表示する
@@ -557,6 +570,29 @@ void DrawPlayer(void)
 
 			}
 
+			if (g_Player[i].freeze)
+			{
+				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[FREEZE_TEXTURE]);
+
+				//プレイヤーの位置やテクスチャー座標を反映
+				float px = g_Player[i].freezePos.x - bg->pos.x;	// プレイヤーの表示位置X
+				float py = g_Player[i].freezePos.y - bg->pos.y;	// プレイヤーの表示位置Y
+				float pw = FREEZE_MAX_DIAMETER * g_Player[i].freezeRadius;	// プレイヤーの表示幅
+				float ph = FREEZE_MAX_DIAMETER * g_Player[i].freezeRadius;		// プレイヤーの表示高さ
+
+				float tw = 1.0f;	// テクスチャの幅
+				float th = 1.0f;	// テクスチャの高さ
+				float tx = 0.0f;	// テクスチャの左上X座標
+				float ty = 0.0f;	// テクスチャの左上Y座標
+
+				// １枚のポリゴンの頂点とテクスチャ座標を設定
+				SetSpriteColorRotation(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+					XMFLOAT4(1.0f, 1.0f, 1.0f, 0.45f),
+					0.0f);
+
+				// ポリゴン描画
+				GetDeviceContext()->Draw(4, 0);
+			}
 			// プレイヤーの分身を描画
 			if (g_Player[i].dash)
 			{	// ダッシュ中だけ分身処理

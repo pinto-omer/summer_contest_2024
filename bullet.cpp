@@ -87,7 +87,8 @@ HRESULT InitBullet(void)
 
 		g_Bullet[i].countAnim = 0;
 		g_Bullet[i].patternAnim = 0;
-
+		g_Bullet[i].frozen = FALSE;
+		g_Bullet[i].freezeRemaining = 0;
 		g_Bullet[i].move = XMFLOAT3(BULLET_SPEED, BULLET_SPEED, 0.0f);	// 移動量を初期化
 	}
 
@@ -131,107 +132,121 @@ void UpdateBullet(void)
 	{
 		if (g_Bullet[i].use == TRUE)	// このバレットが使われている？
 		{								// Yes
-			// アニメーション  
-			g_Bullet[i].countAnim++;
-			if ((g_Bullet[i].countAnim % ANIM_WAIT) == 0)
+			if (!g_Bullet[i].frozen)
 			{
-				// パターンの切り替え
-				g_Bullet[i].patternAnim = (g_Bullet[i].patternAnim + 1) % ANIM_PATTERN_NUM;
-			}
-
-			// バレットの移動処理
-			XMVECTOR pos = XMLoadFloat3(&g_Bullet[i].pos);
-			XMVECTOR move = XMLoadFloat3(&g_Bullet[i].move);
-			pos += move;
-			XMStoreFloat3(&g_Bullet[i].pos, pos);
-
-			// 画面外まで進んだ？
-			BG* bg = GetBG();
-			if (g_Bullet[i].pos.y < (-g_Bullet[i].h / 2))		// 自分の大きさを考慮して画面外か判定している
-			{
-				g_Bullet[i].use = false;
-			}
-			if (g_Bullet[i].pos.y > (bg->h + g_Bullet[i].h / 2))	// 自分の大きさを考慮して画面外か判定している
-			{
-				g_Bullet[i].use = false;
-			}
-
-			// 当たり判定処理
-			{
-				//ENEMY* enemy = GetEnemy();
-				//
-
-				//// エネミーの数分当たり判定を行う
-				//for (int j = 0; j < ENEMY_MAX; j++)
-				//{
-				//	// 生きてるエネミーと当たり判定をする
-				//	if (enemy[j].use == TRUE)
-				//	{
-				//		BOOL ans = CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
-				//			enemy[j].pos, enemy[j].w, enemy[j].h);
-				//		// 当たっている？
-				//		if (ans == TRUE)
-				//		{
-				//			// 当たった時の処理
-				//			enemy[j].use = FALSE;
-				//			AddScore(100);
-
-				//			// エフェクト発生
-				//			SetEffect(enemy[j].pos.x, enemy[j].pos.y, 30);
-				//		}
-				//	}
-				//}
-				
-				// フィールドとの当たり判定
+				// アニメーション  
+				g_Bullet[i].countAnim++;
+				if ((g_Bullet[i].countAnim % ANIM_WAIT) == 0)
 				{
-					FIELD* field = GetField();
-
-					int x = (int)(g_Bullet[i].pos.x / field->tile_w);
-					int y = (int)(g_Bullet[i].pos.y / field->tile_h);
-					if (g_Bullet[i].move.x != 0)
-						x += g_Bullet[i].move.x > 0 ? 1 : -1;
-					else
-						y += g_Bullet[i].move.y > 0 ? 1 : -1;
-					if (x < 0 || x >= FIELD_TILE_W || y < 0 || y > FIELD_TILE_H)
-					{
-						g_Bullet[i].use = FALSE;
-						continue;
-					}
-					TILE tile = GetTile()[field->field[y][x]];
-					if (tile.type != TILE_EMPTY &&
-						CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
-							XMFLOAT3(x * tile.w + tile.w / 2.0f, y * tile.h + tile.h / 2.0f, 0.0f), tile.w, tile.h) == TRUE)
-					{
-						g_Bullet[i].use = FALSE;
-						continue;
-					}
+					// パターンの切り替え
+					g_Bullet[i].patternAnim = (g_Bullet[i].patternAnim + 1) % ANIM_PATTERN_NUM;
 				}
 
-				// プレイヤーとの当たり判定
-				{
-					PLAYER* player = GetPlayer();
-					float tipAdjust = (g_Bullet[i].h - TIP_SIZE) * 0.5f;
-					XMFLOAT3 tipPos = g_Bullet[i].pos;
-					if (g_Bullet[i].move.x != 0)
-					{
-						tipAdjust *= g_Bullet[i].move.x > 0 ? 1 : -1;
-						tipPos.x += tipAdjust;
+				// バレットの移動処理
+				XMVECTOR pos = XMLoadFloat3(&g_Bullet[i].pos);
+				XMVECTOR move = XMLoadFloat3(&g_Bullet[i].move);
+				pos += move;
+				XMStoreFloat3(&g_Bullet[i].pos, pos);
 
-						if (CollisionBB(g_Bullet[i].pos,  TIP_SIZE * 0.5f, g_Bullet[i].w * 0.5f,
-							player->pos, player->w*0.5f, player->h) == TRUE)
-							g_Bullet[i].use = FALSE;
-					}
-					else
+				// 画面外まで進んだ？
+				BG* bg = GetBG();
+				if (g_Bullet[i].pos.y < (-g_Bullet[i].h / 2))		// 自分の大きさを考慮して画面外か判定している
+				{
+					g_Bullet[i].use = false;
+				}
+				if (g_Bullet[i].pos.y > (bg->h + g_Bullet[i].h / 2))	// 自分の大きさを考慮して画面外か判定している
+				{
+					g_Bullet[i].use = false;
+				}
+
+				// 当たり判定処理
+
+				{
+					//ENEMY* enemy = GetEnemy();
+					//
+
+					//// エネミーの数分当たり判定を行う
+					//for (int j = 0; j < ENEMY_MAX; j++)
+					//{
+					//	// 生きてるエネミーと当たり判定をする
+					//	if (enemy[j].use == TRUE)
+					//	{
+					//		BOOL ans = CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
+					//			enemy[j].pos, enemy[j].w, enemy[j].h);
+					//		// 当たっている？
+					//		if (ans == TRUE)
+					//		{
+					//			// 当たった時の処理
+					//			enemy[j].use = FALSE;
+					//			AddScore(100);
+
+					//			// エフェクト発生
+					//			SetEffect(enemy[j].pos.x, enemy[j].pos.y, 30);
+					//		}
+					//	}
+					//}
+
+					// フィールドとの当たり判定
 					{
-						tipAdjust *= g_Bullet[i].move.y > 0 ? 1 : -1;
-						tipPos.y += tipAdjust;
-						if (CollisionBB(tipPos, g_Bullet[i].w * 0.5f, TIP_SIZE * 0.5f,
-							player->pos, player->w * 0.5f, player->h * 0.5f) == TRUE)
+						FIELD* field = GetField();
+
+						int x = (int)(g_Bullet[i].pos.x / field->tile_w);
+						int y = (int)(g_Bullet[i].pos.y / field->tile_h);
+						if (g_Bullet[i].move.x != 0)
+							x += g_Bullet[i].move.x > 0 ? 1 : -1;
+						else
+							y += g_Bullet[i].move.y > 0 ? 1 : -1;
+						if (x < 0 || x >= FIELD_TILE_W || y < 0 || y > FIELD_TILE_H)
+						{
 							g_Bullet[i].use = FALSE;
+							continue;
+						}
+						TILE tile = GetTile()[field->field[y][x]];
+						if (tile.type != TILE_EMPTY &&
+							CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
+								XMFLOAT3(x * tile.w + tile.w / 2.0f, y * tile.h + tile.h / 2.0f, 0.0f), tile.w, tile.h) == TRUE)
+						{
+							g_Bullet[i].use = FALSE;
+							continue;
+						}
 					}
+
+					// プレイヤーとの当たり判定
+					if (g_Bullet[i].use)
+					{
+						PLAYER* player = GetPlayer();
+						if (player->freeze && CollisionBC(player->freezePos, g_Bullet[i].pos, FREEZE_MAX_DIAMETER / 2.0f * player->freezeRadius, g_Bullet[i].h / 2.0f))
+						{
+							g_Bullet[i].frozen = TRUE;
+							g_Bullet[i].freezeRemaining = FREEZE_DURATION;
+							continue;
+						}
+						float tipAdjust = (g_Bullet[i].h - TIP_SIZE) * 0.5f;
+						XMFLOAT3 tipPos = g_Bullet[i].pos;
+						if (g_Bullet[i].move.x != 0)
+						{
+							tipAdjust *= g_Bullet[i].move.x > 0 ? 1 : -1;
+							tipPos.x += tipAdjust;
+
+							if (CollisionBB(g_Bullet[i].pos, TIP_SIZE * 0.5f, g_Bullet[i].w * 0.5f,
+								player->pos, player->w * 0.5f, player->h) == TRUE)
+								g_Bullet[i].use = FALSE;
+						}
+						else
+						{
+							tipAdjust *= g_Bullet[i].move.y > 0 ? 1 : -1;
+							tipPos.y += tipAdjust;
+							if (CollisionBB(tipPos, g_Bullet[i].w * 0.5f, TIP_SIZE * 0.5f,
+								player->pos, player->w * 0.5f, player->h * 0.5f) == TRUE)
+								g_Bullet[i].use = FALSE;
+						}
+					}
+
+
 				}
 			}
-
+			else if (--g_Bullet[i].freezeRemaining == 0)
+				g_Bullet[i].frozen = FALSE;
 
 			bulletCount++;
 		}
@@ -291,6 +306,33 @@ void DrawBullet(void)
 
 			// ポリゴン描画
 			GetDeviceContext()->Draw(4, 0);
+
+			if (g_Bullet[i].frozen)
+			{
+				// テクスチャ設定
+				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Bullet[i].texNo]);
+
+				//バレットの位置やテクスチャー座標を反映
+				float px = g_Bullet[i].pos.x - bg->pos.x;	// バレットの表示位置X
+				float py = g_Bullet[i].pos.y - bg->pos.y;	// バレットの表示位置Y
+				float pw = g_Bullet[i].w;		// バレットの表示幅
+				float ph = g_Bullet[i].h;		// バレットの表示高さ
+
+				float tw = 1.0f / TEXTURE_PATTERN_DIVIDE_X;	// テクスチャの幅
+				float th = 1.0f / TEXTURE_PATTERN_DIVIDE_Y;	// テクスチャの高さ
+				float tx = (float)(g_Bullet[i].patternAnim % TEXTURE_PATTERN_DIVIDE_X) * tw;	// テクスチャの左上X座標
+				float ty = (float)(g_Bullet[i].patternAnim / TEXTURE_PATTERN_DIVIDE_X) * th;	// テクスチャの左上Y座標
+
+				// １枚のポリゴンの頂点とテクスチャ座標を設定
+				SetSpriteColorRotation(g_VertexBuffer,
+					px, py, pw, ph,
+					tx, ty, tw, th,
+					XMFLOAT4(0.0f, 0.0f, 1.0f, (float)g_Bullet[i].freezeRemaining / FREEZE_DURATION),
+					g_Bullet[i].rot.z);
+
+				// ポリゴン描画
+				GetDeviceContext()->Draw(4, 0);
+			}
 		}
 	}
 
