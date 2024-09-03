@@ -40,10 +40,11 @@ struct	SAVEDATA				// セーブデータの構造体
 
 struct SAVEFIELD
 {
+	int			sum;
+	int			vartilesize;
 	int			field[FIELD_TILE_H][FIELD_TILE_W];
 	XMINT2		varTilePos[MAX_VAR_TILES];
 	VARTILE		varTiles[MAX_VAR_TILES];
-	int			sum;
 };
 
 /*******************************************************************************

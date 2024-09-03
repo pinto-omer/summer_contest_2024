@@ -198,6 +198,7 @@ void SaveField(int id)
 		memcpy(sField.field, field->field, sizeof(sField.field));
 		memcpy(sField.varTilePos, field->varTilePos, sizeof(sField.varTilePos));
 		memcpy(sField.varTiles, GetVarTile(), sizeof(sField.varTiles));
+		sField.vartilesize = sizeof(VARTILE);
 	}
 
 	// セーブデータのチェックサムを求める
@@ -288,7 +289,22 @@ void LoadField(int id)
 		FIELD* field = GetField();
 		memcpy(field->field, sField.field, sizeof(sField.field));
 		memcpy(field->varTilePos, sField.varTilePos, sizeof(sField.varTilePos));
-		memcpy(GetVarTile(), sField.varTiles, sizeof(sField.varTiles));
+		// future proofing saves in case of adding more members to VARTILE
+		if (sField.vartilesize < sizeof(VARTILE))
+		{
+			char* adr = (char*)GetVarTile();
+			char* sAdr = (char*)sField.varTiles;
+			for (int i = 0; i < MAX_VAR_TILES; i++)
+			{
+				for (int j = 0; j < sField.vartilesize; j++)
+				{
+					*(adr++) = *(sAdr++);
+				}
+				adr += sizeof(VARTILE) - sField.vartilesize;
+			}
+		}
+		else
+			memcpy(GetVarTile(), sField.varTiles, sizeof(sField.varTiles));
 		FindLastVarTileIDX();
 	}
 
