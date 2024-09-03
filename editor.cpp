@@ -244,6 +244,8 @@ void UpdateEditor(void)
 		{
 			if (--g_Editor.texNo < 0)
 				g_Editor.texNo = TILE_MAX - 1;
+			if (g_Editor.texNo == TILE_FROZEN_ARROW)
+				g_Editor.texNo--;
 			TILE tile = GetTile()[g_Editor.texNo];
 			isVarTile = tile.isVariable;
 			if (tile.isVariable == TRUE)
@@ -253,7 +255,10 @@ void UpdateEditor(void)
 		}
 		else if (GetKeyboardRepeat(DIK_E))
 		{
-			if (++g_Editor.texNo >= TILE_MAX)
+			g_Editor.texNo++;
+			if (g_Editor.texNo == TILE_FROZEN_ARROW)
+				g_Editor.texNo++;
+			if (g_Editor.texNo >= TILE_MAX)
 				g_Editor.texNo = 0;
 			TILE tile = GetTile()[g_Editor.texNo];
 			isVarTile = tile.isVariable;

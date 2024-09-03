@@ -16,8 +16,8 @@
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_HEIGHT				(50)	// 
-#define TEXTURE_WIDTH				(TEXTURE_HEIGHT / 3)	// キャラサイズ
+#define TEXTURE_HEIGHT				(BULLET_HEIGHT)	// 
+#define TEXTURE_WIDTH				(BULLET_WIDTH)	// キャラサイズ
 #define TEXTURE_MAX					(1)		// テクスチャの数
 #define TIP_SIZE					(TEXTURE_HEIGHT / 5)
 #define TEXTURE_PATTERN_DIVIDE_X	(1)		// アニメパターンのテクスチャ内分割数（X)
@@ -187,8 +187,8 @@ void UpdateBullet(void)
 					//}
 
 					// フィールドとの当たり判定
+					FIELD* field = GetField();
 					{
-						FIELD* field = GetField();
 
 						int x = (int)(g_Bullet[i].pos.x / field->tile_w);
 						int y = (int)(g_Bullet[i].pos.y / field->tile_h);
@@ -219,6 +219,7 @@ void UpdateBullet(void)
 						{
 							g_Bullet[i].frozen = TRUE;
 							g_Bullet[i].freezeRemaining = FREEZE_DURATION;
+							field->field[(int)(g_Bullet[i].pos.y / TILE_HEIGHT)][(int)(g_Bullet[i].pos.x / TILE_WIDTH)] = TILE_FROZEN_ARROW;
 							continue;
 						}
 						float tipAdjust = (g_Bullet[i].h - TIP_SIZE) * 0.5f;
@@ -246,7 +247,10 @@ void UpdateBullet(void)
 				}
 			}
 			else if (--g_Bullet[i].freezeRemaining == 0)
+			{
 				g_Bullet[i].frozen = FALSE;
+				GetField()->field[(int)(g_Bullet[i].pos.y / TILE_HEIGHT)][(int)(g_Bullet[i].pos.x / TILE_WIDTH)] = TILE_EMPTY;
+			}
 
 			bulletCount++;
 		}

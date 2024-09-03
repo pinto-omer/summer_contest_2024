@@ -15,7 +15,8 @@
 //*****************************************************************************
 #define BULLET_MAX		(100)		// バレットのMax数
 #define BULLET_SPEED	(6.0f)		// バレットの移動スピード
-
+#define BULLET_HEIGHT	(50)
+#define BULLET_WIDTH	(TEXTURE_HEIGHT / 3)
 
 // バレット構造体
 struct BULLET

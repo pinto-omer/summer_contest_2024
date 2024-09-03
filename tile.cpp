@@ -12,6 +12,7 @@
 #include "effect.h"
 #include "editor.h"
 #include "variabletile.h"
+#include "bullet.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -41,7 +42,7 @@ static char* g_TexturName[] = {
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_01.png",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_37.png",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_29.png",
-
+	"",
 };
 
 static BOOL		g_Load = FALSE;			// 初期化を行ったかのフラグ
@@ -96,6 +97,10 @@ HRESULT InitTile(void)
 
 	g_Tile[TILE_TRAP].type = GROUND;
 	g_Tile[TILE_TRAP].isVariable = TRUE;
+
+	g_Tile[TILE_FROZEN_ARROW].type = GROUND;
+	g_Tile[TILE_FROZEN_ARROW].h = BULLET_HEIGHT;
+	g_Tile[TILE_FROZEN_ARROW].w = BULLET_WIDTH;
 
 	g_Load = TRUE;
 	return S_OK;
