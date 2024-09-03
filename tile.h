@@ -42,6 +42,7 @@ enum {
 	GROUND,
 	MOVING,
 	DIRECTIONAL,
+	TYPE_ARROW,
 	TILE_TYPE_MAX
 };
 //*****************************************************************************

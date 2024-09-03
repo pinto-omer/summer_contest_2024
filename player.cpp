@@ -367,9 +367,23 @@ void UpdatePlayer(void)
 					{
 						g_Player[i].pos.y += y - g_Player[i].jumpY;
 						g_Player[i].jumpY = y;
-						if (GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y - g_Player[i].h / 2.0f, 0)) != AIR)
+						XMFLOAT3 pPos = XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y - g_Player[i].h / 2.0f, 0);
+						int type = GetTileType(pPos);
+						if (type != AIR)
 						{
-							g_Player[i].pos.y = (int)(g_Player[i].pos.y / GetTile()->h) * GetTile()->h + g_Player[i].h / 2.0f;
+							if (type != TYPE_ARROW)
+								g_Player[i].pos.y = (int)(g_Player[i].pos.y / GetTile()->h) * GetTile()->h + g_Player[i].h / 2.0f;
+							else
+							{
+								BULLET* bullet = GetBullet();
+								for (int i = 0; i < BULLET_MAX; i++)
+								{
+									if (!bullet[i].use || !bullet[i].frozen) continue;
+									else if (bullet[i].frozen &&
+										CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[i].pos, bullet[i].w * 0.33f, bullet[i].h))
+										g_Player[i].pos.y = bullet[i].pos.y + bullet[i].w * 0.33f + g_Player[i].h * 0.5f;
+								}
+							}
 							g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX;
 							g_Player[i].jumpY = 0;
 						}
@@ -381,10 +395,26 @@ void UpdatePlayer(void)
 							g_Player[i].fallSpeed += PLAYER_JUMP_GRAVITY;
 
 					}
+
+					XMFLOAT3 pPos = XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0);
+					int type = GetTileType(pPos);
 					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2 &&
-						GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == GROUND)
+						(type == GROUND ||
+						 type == TYPE_ARROW))
 					{
+						if (type == GROUND)
 						g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y - g_Player[i].h / 2.0f;
+						else
+						{
+							BULLET* bullet = GetBullet();
+							for (int i = 0; i < BULLET_MAX; i++)
+							{
+								if (!bullet[i].use || !bullet[i].frozen) continue;
+								else if (bullet[i].frozen &&
+									CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[i].pos, bullet[i].w * 0.33f, bullet[i].h))
+									g_Player[i].pos.y = bullet[i].pos.y - bullet[i].w * 0.33f - g_Player[i].h * 0.5f;
+							}
+						}
 						g_Player[i].jump = FALSE;
 						g_Player[i].jumpCnt = 0;
 						g_Player[i].jumpY = 0.0f;
@@ -422,7 +452,7 @@ void UpdatePlayer(void)
 						g_Player[i].freezeRadius += 1.0f / FREEZE_FRAME_COUNT;
 					else
 						g_Player[i].freeze = false;
-					
+
 				}
 				// MAP外チェック
 				BG* bg = GetBG();

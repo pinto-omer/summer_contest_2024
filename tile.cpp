@@ -98,7 +98,7 @@ HRESULT InitTile(void)
 	g_Tile[TILE_TRAP].type = GROUND;
 	g_Tile[TILE_TRAP].isVariable = TRUE;
 
-	g_Tile[TILE_FROZEN_ARROW].type = GROUND;
+	g_Tile[TILE_FROZEN_ARROW].type = TYPE_ARROW;
 	g_Tile[TILE_FROZEN_ARROW].h = BULLET_HEIGHT;
 	g_Tile[TILE_FROZEN_ARROW].w = BULLET_WIDTH;
 

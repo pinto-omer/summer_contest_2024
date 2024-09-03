@@ -219,6 +219,7 @@ void UpdateBullet(void)
 						{
 							g_Bullet[i].frozen = TRUE;
 							g_Bullet[i].freezeRemaining = FREEZE_DURATION;
+							if (field->field[(int)(g_Bullet[i].pos.y / TILE_HEIGHT)][(int)(g_Bullet[i].pos.x / TILE_WIDTH)] == TILE_EMPTY)
 							field->field[(int)(g_Bullet[i].pos.y / TILE_HEIGHT)][(int)(g_Bullet[i].pos.x / TILE_WIDTH)] = TILE_FROZEN_ARROW;
 							continue;
 						}
@@ -229,7 +230,7 @@ void UpdateBullet(void)
 							tipAdjust *= g_Bullet[i].move.x > 0 ? 1 : -1;
 							tipPos.x += tipAdjust;
 
-							if (CollisionBB(g_Bullet[i].pos, TIP_SIZE * 0.5f, g_Bullet[i].w * 0.5f,
+							if (CollisionBB(g_Bullet[i].pos, TIP_SIZE * 0.5f, g_Bullet[i].w * 0.8f,
 								player->pos, player->w * 0.5f, player->h) == TRUE)
 								g_Bullet[i].use = FALSE;
 						}
@@ -237,7 +238,7 @@ void UpdateBullet(void)
 						{
 							tipAdjust *= g_Bullet[i].move.y > 0 ? 1 : -1;
 							tipPos.y += tipAdjust;
-							if (CollisionBB(tipPos, g_Bullet[i].w * 0.5f, TIP_SIZE * 0.5f,
+							if (CollisionBB(tipPos, g_Bullet[i].w * 0.8f, TIP_SIZE * 0.5f,
 								player->pos, player->w * 0.5f, player->h * 0.5f) == TRUE)
 								g_Bullet[i].use = FALSE;
 						}
