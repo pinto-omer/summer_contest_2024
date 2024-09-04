@@ -219,8 +219,15 @@ void UpdateBullet(void)
 						{
 							g_Bullet[i].frozen = TRUE;
 							g_Bullet[i].freezeRemaining = FREEZE_DURATION;
-							if (field->field[(int)(g_Bullet[i].pos.y / TILE_HEIGHT)][(int)(g_Bullet[i].pos.x / TILE_WIDTH)] == TILE_EMPTY)
-							field->field[(int)(g_Bullet[i].pos.y / TILE_HEIGHT)][(int)(g_Bullet[i].pos.x / TILE_WIDTH)] = TILE_FROZEN_ARROW;
+							float y1, y2, x1, x2;
+							y1 = g_Bullet[i].pos.y + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
+							y2 = g_Bullet[i].pos.y - 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
+							x1 = g_Bullet[i].pos.x + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].w : g_Bullet[i].h);
+							x2 = g_Bullet[i].pos.x - 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].w : g_Bullet[i].h);
+							if (GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] == TILE_EMPTY)
+								GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] = TILE_FROZEN_ARROW;
+							if (GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] == TILE_EMPTY)
+								GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] = TILE_FROZEN_ARROW;
 							continue;
 						}
 						float tipAdjust = (g_Bullet[i].h - TIP_SIZE) * 0.5f;
@@ -250,7 +257,15 @@ void UpdateBullet(void)
 			else if (--g_Bullet[i].freezeRemaining == 0)
 			{
 				g_Bullet[i].frozen = FALSE;
-				GetField()->field[(int)(g_Bullet[i].pos.y / TILE_HEIGHT)][(int)(g_Bullet[i].pos.x / TILE_WIDTH)] = TILE_EMPTY;
+				float y1, y2, x1, x2;
+				y1 = g_Bullet[i].pos.y + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
+				y2 = g_Bullet[i].pos.y - 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
+				x1 = g_Bullet[i].pos.x + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].w : g_Bullet[i].h);
+				x2 = g_Bullet[i].pos.x - 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].w : g_Bullet[i].h);
+				if (GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] == TILE_FROZEN_ARROW)
+					GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] = TILE_EMPTY;
+				if (GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] == TILE_FROZEN_ARROW)
+					GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] = TILE_EMPTY;
 			}
 
 			bulletCount++;
