@@ -506,7 +506,9 @@ void UpdatePlayer(void)
 
 				else if (g_Player[i].pos.y > bg->h - (g_Player[i].h / 2.0f))
 				{
-					g_Player[i].pos.y = bg->h - (g_Player[i].h / 2.0f);
+					g_Player[i].hp = 0.0f;
+					SetMode(MODE_RESULT);
+					return;
 				}
 
 
