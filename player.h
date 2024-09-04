@@ -18,6 +18,7 @@
 
 #define	PLAYER_OFFSET_CNT	(16)	// 16ï™êg
 
+#define PLAYER_MAX_HP		(100.0f)
 #define FREEZE_MAX_DIAMETER	(TILE_WIDTH * 10.0f)
 #define	FREEZE_DURATION		(300)	//freeze duration in frames
 enum
@@ -30,6 +31,7 @@ enum
 
 	CHAR_DIR_MAX
 };
+
 
 //*****************************************************************************
 // ç\ë¢ëÃíËã`
@@ -78,5 +80,5 @@ void DrawPlayer(void);
 PLAYER* GetPlayer(void);
 
 int GetPlayerCount(void);
-
+void DamagePlayer(PLAYER* player);
 

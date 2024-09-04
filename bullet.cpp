@@ -239,7 +239,10 @@ void UpdateBullet(void)
 
 							if (CollisionBB(g_Bullet[i].pos, TIP_SIZE * 0.5f, g_Bullet[i].w * 0.8f,
 								player->pos, player->w * 0.5f, player->h) == TRUE)
+							{
 								g_Bullet[i].use = FALSE;
+								DamagePlayer(player);
+							}
 						}
 						else
 						{
@@ -247,7 +250,10 @@ void UpdateBullet(void)
 							tipPos.y += tipAdjust;
 							if (CollisionBB(tipPos, g_Bullet[i].w * 0.8f, TIP_SIZE * 0.5f,
 								player->pos, player->w * 0.5f, player->h * 0.5f) == TRUE)
+							{
 								g_Bullet[i].use = FALSE;
+								DamagePlayer(player);
+							}
 						}
 					}
 

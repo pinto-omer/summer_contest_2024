@@ -19,8 +19,8 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(128)	// キャラサイズ
 #define TEXTURE_HEIGHT				(70)	// 
-#define TEXTURE_MAX					(CHAR_DIR_MAX+2)		// テクスチャの数
-#define FREEZE_TEXTURE				(CHAR_DIR_MAX+1)
+#define TEXTURE_MAX					(MISC_TEXTURE_MAX)		// テクスチャの数
+
 #define FREEZE_FRAME_COUNT			(30)
 //#define TEXTURE_PATTERN_DIVIDE_X	(3)		// アニメパターンのテクスチャ内分割数（X)
 //#define TEXTURE_PATTERN_DIVIDE_Y	(4)		// アニメパターンのテクスチャ内分割数（Y)
@@ -40,10 +40,17 @@
 #define PLAYER_JUMP_GRAVITY			(0.5f)
 #define PLAYER_MAX_FALL_SPEED		(15.0f)
 
-#define PLAYER_MAX_HP				(100.0f)
 #define PLAYER_HIT_IFRAMES			(60)
-#define PLAYER_REGEN_START			(120)
-#define PLAYER_REGEN_AMOUNT			(0.02f)
+#define PLAYER_REGEN_START			(240)
+#define PLAYER_REGEN_AMOUNT			(0.2f)
+
+enum
+{
+	SHADOW = CHAR_DIR_MAX,
+	FREEZE,
+
+	MISC_TEXTURE_MAX
+};
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -598,7 +605,7 @@ void DrawPlayer(void)
 				SetBlendState(BLEND_MODE_SUBTRACT);	// 減算合成
 
 				// テクスチャ設定
-				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[CHAR_DIR_MAX]);
+				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[SHADOW]);
 
 				float px = g_Player[i].pos.x - bg->pos.x;	// プレイヤーの表示位置X
 				float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
@@ -627,7 +634,7 @@ void DrawPlayer(void)
 
 			if (g_Player[i].freeze)
 			{
-				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[FREEZE_TEXTURE]);
+				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[FREEZE]);
 
 				//プレイヤーの位置やテクスチャー座標を反映
 				float px = g_Player[i].freezePos.x - bg->pos.x;	// プレイヤーの表示位置X
@@ -707,6 +714,13 @@ PLAYER* GetPlayer(void)
 int GetPlayerCount(void)
 {
 	return g_PlayerCount;
+}
+
+void DamagePlayer(PLAYER* player)
+{
+	if (player->framesSinceHit < PLAYER_HIT_IFRAMES) return;
+	player->hp -= 30.0f;
+	player->framesSinceHit = 0;
 }
 
 

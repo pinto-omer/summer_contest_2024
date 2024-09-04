@@ -15,7 +15,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "bullet.h"
-#include "score.h"
+#include "overlay.h"
 #include "result.h"
 #include "sound.h"
 #include "fade.h"
@@ -317,10 +317,10 @@ void Update(void)
 		UpdateBG();
 		UpdateField();
 		UpdatePlayer();
-		UpdateEnemy();
+//		UpdateEnemy();
 		UpdateBullet();
 		UpdateEffect();
-		UpdateScore();
+		UpdateOverlay();
 
 		if(GetFade() == FADE_NONE)
 		{	// 全滅チェック
@@ -379,10 +379,10 @@ void Draw(void)
 		DrawBG();
 		DrawField();
 		DrawBullet();		// 重なる順番を意識してね
-		DrawEnemy();
+	//	DrawEnemy();
 		DrawPlayer();
 		DrawEffect();
-		DrawScore();
+		DrawOverlay();
 		break;
 
 	case MODE_RESULT:		// リザルト画面の描画
@@ -446,13 +446,13 @@ void SetMode(int mode)
 	UninitPlayer();
 
 	// エネミーの終了処理
-	UninitEnemy();
+	//UninitEnemy();
 
 	// バレットの終了処理
 	UninitBullet();
 
 	// スコアの終了処理
-	UninitScore();
+	UninitOverlay();
 
 	// リザルトの終了処理
 	UninitResult();
@@ -483,10 +483,10 @@ void SetMode(int mode)
 		InitBG();
 		InitField();
 		InitPlayer();
-		InitEnemy();
+		//InitEnemy();
 		InitBullet();
 		InitEffect();
-		InitScore();
+		InitOverlay();
 
 		// ロードゲームだったらすべての初期化が終わった後にセーブデータを読み込む
 		if (g_LoadGame == TRUE)
