@@ -39,6 +39,11 @@
 #define	PLAYER_JUMP_Y_MAX			(150.0f)	// ジャンプの高さ
 #define PLAYER_JUMP_GRAVITY			(0.5f)
 #define PLAYER_MAX_FALL_SPEED		(15.0f)
+
+#define PLAYER_MAX_HP				(100.0f)
+#define PLAYER_HIT_IFRAMES			(60)
+#define PLAYER_REGEN_START			(120)
+#define PLAYER_REGEN_AMOUNT			(0.02f)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -146,6 +151,8 @@ HRESULT InitPlayer(void)
 		{
 			g_Player[i].offset[j] = g_Player[i].pos;
 		}
+		g_Player[i].hp = PLAYER_MAX_HP;
+		g_Player[i].framesSinceHit = 0;
 	}
 
 
@@ -195,7 +202,22 @@ void UpdatePlayer(void)
 
 			// 地形との当たり判定用に座標のバックアップを取っておく
 			XMFLOAT3 pos_old = g_Player[i].pos;
+			if (g_Player[i].hp <= 0)
+			{
+				SetMode(MODE_RESULT);
+				return;
+			}
+			else if (g_Player[i].hp > PLAYER_MAX_HP)
+			{
+				g_Player[i].hp = PLAYER_MAX_HP;
+			}
+			else if (g_Player[i].hp < PLAYER_MAX_HP && g_Player[i].framesSinceHit >= PLAYER_REGEN_START)
+			{
+				g_Player[i].hp += PLAYER_REGEN_AMOUNT;
+			}
 
+			if (g_Player[i].framesSinceHit < PLAYER_REGEN_START)
+				g_Player[i].framesSinceHit++;
 			// 分身用
 			for (int j = PLAYER_OFFSET_CNT - 1; j > 0; j--)
 			{
@@ -631,36 +653,39 @@ void DrawPlayer(void)
 			{	// ダッシュ中だけ分身処理
 				DrawPlayerOffset(i);
 			}
+			if (g_Player[i].framesSinceHit > PLAYER_HIT_IFRAMES ||
+				g_Player[i].framesSinceHit % 5 < 3)
+			{
+				// テクスチャ設定
+				GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Player[i].texNo]);
 
-			// テクスチャ設定
-			GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Player[i].texNo]);
+				//プレイヤーの位置やテクスチャー座標を反映
+				float px = g_Player[i].pos.x - bg->pos.x;	// プレイヤーの表示位置X
+				float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
+				float pw = g_Player[i].w;		// プレイヤーの表示幅
+				float ph = g_Player[i].h;		// プレイヤーの表示高さ
 
-			//プレイヤーの位置やテクスチャー座標を反映
-			float px = g_Player[i].pos.x - bg->pos.x;	// プレイヤーの表示位置X
-			float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
-			float pw = g_Player[i].w;		// プレイヤーの表示幅
-			float ph = g_Player[i].h;		// プレイヤーの表示高さ
+				//py += g_Player[i].jumpY;		// ジャンプ中の高さを足す
 
-			//py += g_Player[i].jumpY;		// ジャンプ中の高さを足す
+				// アニメーション用
+				float tw = 1.0f / texturePatternDivideX[g_Player[i].dir];	// テクスチャの幅
+				float th = 1.0f / texturePatternDivideY[g_Player[i].dir];	// テクスチャの高さ
+				float tx = (float)(g_Player[i].patternAnim % texturePatternDivideX[g_Player[i].dir]) * tw;	// テクスチャの左上X座標
+				float ty = (float)(g_Player[i].patternAnim / texturePatternDivideX[g_Player[i].dir]) * th;	// テクスチャの左上Y座標
 
-			// アニメーション用
-			float tw = 1.0f / texturePatternDivideX[g_Player[i].dir];	// テクスチャの幅
-			float th = 1.0f / texturePatternDivideY[g_Player[i].dir];	// テクスチャの高さ
-			float tx = (float)(g_Player[i].patternAnim % texturePatternDivideX[g_Player[i].dir]) * tw;	// テクスチャの左上X座標
-			float ty = (float)(g_Player[i].patternAnim / texturePatternDivideX[g_Player[i].dir]) * th;	// テクスチャの左上Y座標
+				//float tw = 1.0f;	// テクスチャの幅
+				//float th = 1.0f;	// テクスチャの高さ
+				//float tx = 0.0f;	// テクスチャの左上X座標
+				//float ty = 0.0f;	// テクスチャの左上Y座標
+				float alpha = GetMode() == MODE_GAME ? 1.0f : 0.5f;
+				// １枚のポリゴンの頂点とテクスチャ座標を設定
+				SetSpriteColorRotation(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+					XMFLOAT4(1.0f, 1.0f, 1.0f, alpha),
+					g_Player[i].rot.z);
 
-			//float tw = 1.0f;	// テクスチャの幅
-			//float th = 1.0f;	// テクスチャの高さ
-			//float tx = 0.0f;	// テクスチャの左上X座標
-			//float ty = 0.0f;	// テクスチャの左上Y座標
-			float alpha = GetMode() == MODE_GAME ? 1.0f : 0.5f;
-			// １枚のポリゴンの頂点とテクスチャ座標を設定
-			SetSpriteColorRotation(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-				XMFLOAT4(1.0f, 1.0f, 1.0f, alpha),
-				g_Player[i].rot.z);
-
-			// ポリゴン描画
-			GetDeviceContext()->Draw(4, 0);
+				// ポリゴン描画
+				GetDeviceContext()->Draw(4, 0);
+			}
 
 		}
 	}

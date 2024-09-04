@@ -61,6 +61,9 @@ struct PLAYER
 	BOOL		freeze;
 	XMFLOAT3	freezePos;
 	float		freezeRadius;
+
+	float		hp;
+	int			framesSinceHit;
 };
 
 
