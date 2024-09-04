@@ -31,6 +31,9 @@
 #define PLAYER_DISP_X				(SCREEN_WIDTH/2)
 #define PLAYER_DISP_Y				(SCREEN_HEIGHT/2 + TEXTURE_HEIGHT)
 
+#define PLAYER_INITIAL_X			(80.0f)
+#define PLAYER_INITIAL_Y			(930.0f)
+
 // ジャンプ処理
 #define	PLAYER_JUMP_CNT_MAX			(45)		// 30フレームで着地する
 #define	PLAYER_JUMP_Y_MAX			(150.0f)	// ジャンプの高さ
@@ -115,7 +118,7 @@ HRESULT InitPlayer(void)
 	{
 		g_PlayerCount++;
 		g_Player[i].use = TRUE;
-		g_Player[i].pos = XMFLOAT3(400.0f, 0.0f, 0.0f);	// 中心点から表示
+		g_Player[i].pos = XMFLOAT3(PLAYER_INITIAL_X, PLAYER_INITIAL_Y, 0.0f);	// 中心点から表示
 		g_Player[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		g_Player[i].w = TEXTURE_WIDTH;
 		g_Player[i].h = TEXTURE_HEIGHT;
@@ -180,7 +183,7 @@ void UninitPlayer(void)
 //=============================================================================
 void UpdatePlayer(void)
 {
-	if (g_Load == FALSE) return;
+	if (g_Load == FALSE || GetMode() == MODE_EDITOR) return;
 	g_PlayerCount = 0;				// 生きてるプレイヤーの数
 
 	for (int i = 0; i < PLAYER_MAX; i++)
@@ -568,7 +571,7 @@ void DrawPlayer(void)
 	{
 		if (g_Player[i].use == TRUE)		// このプレイヤーが使われている？
 		{									// Yes
-
+			if (GetMode() == MODE_GAME)
 			{	// 影表示
 				SetBlendState(BLEND_MODE_SUBTRACT);	// 減算合成
 
@@ -650,10 +653,10 @@ void DrawPlayer(void)
 			//float th = 1.0f;	// テクスチャの高さ
 			//float tx = 0.0f;	// テクスチャの左上X座標
 			//float ty = 0.0f;	// テクスチャの左上Y座標
-
+			float alpha = GetMode() == MODE_GAME ? 1.0f : 0.5f;
 			// １枚のポリゴンの頂点とテクスチャ座標を設定
 			SetSpriteColorRotation(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-				XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+				XMFLOAT4(1.0f, 1.0f, 1.0f, alpha),
 				g_Player[i].rot.z);
 
 			// ポリゴン描画

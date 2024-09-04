@@ -310,6 +310,7 @@ void Update(void)
 		UpdateBG();
 		UpdateField();
 		UpdateEffect();
+		UpdatePlayer();
 		UpdateEditor();
 		break;
 	case MODE_GAME:			// ゲーム画面の更新
@@ -371,6 +372,7 @@ void Draw(void)
 		DrawBG();
 		DrawField();
 		DrawEffect();
+		DrawPlayer();
 		DrawEditor();
 		break;
 	case MODE_GAME:			// ゲーム画面の描画
@@ -473,6 +475,7 @@ void SetMode(int mode)
 		InitBG();
 		InitField();
 		InitEffect();
+		InitPlayer();
 		InitEditor();
 		break;
 	case MODE_GAME:
