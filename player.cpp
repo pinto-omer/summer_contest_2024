@@ -263,12 +263,7 @@ void UpdatePlayer(void)
 				g_Player[i].moving = FALSE;
 				g_Player[i].dash = FALSE;
 
-				if (GetKeyboardPress(DIK_C) || IsButtonPressed(0, BUTTON_A))
-				{
-					speed *= 4;
-					g_Player[i].dash = TRUE;
-				}
-
+				
 
 				/*	if (GetKeyboardPress(DIK_DOWN))
 					{
@@ -410,12 +405,12 @@ void UpdatePlayer(void)
 							else
 							{
 								BULLET* bullet = GetBullet();
-								for (int i = 0; i < BULLET_MAX; i++)
+								for (int j = 0; j < BULLET_MAX; j++)
 								{
-									if (!bullet[i].use || !bullet[i].frozen) continue;
-									else if (bullet[i].frozen &&
-										CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[i].pos, bullet[i].w * 0.33f, bullet[i].h))
-										g_Player[i].pos.y = bullet[i].pos.y + bullet[i].w * 0.33f + g_Player[i].h * 0.5f;
+									if (!bullet[j].use || !bullet[j].frozen) continue;
+									else if (bullet[j].frozen &&
+										CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.33f, bullet[j].h))
+										g_Player[i].pos.y = bullet[j].pos.y + bullet[j].w * 0.33f + g_Player[j].h * 0.5f;
 								}
 							}
 							g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX;
@@ -447,12 +442,12 @@ void UpdatePlayer(void)
 						else
 						{
 							BULLET* bullet = GetBullet();
-							for (int i = 0; i < BULLET_MAX; i++)
+							for (int j = 0; j < BULLET_MAX; j++)
 							{
-								if (!bullet[i].use || !bullet[i].frozen) continue;
-								else if (bullet[i].frozen &&
-									CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[i].pos, bullet[i].w * 0.33f, bullet[i].h))
-									g_Player[i].pos.y = bullet[i].pos.y - bullet[i].w * 0.33f - g_Player[i].h * 0.5f;
+								if (!bullet[j].use || !bullet[j].frozen) continue;
+								else if (bullet[j].frozen &&
+									CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.33f, bullet[j].h))
+									g_Player[i].pos.y = bullet[j].pos.y - bullet[j].w * 0.33f - g_Player[i].h * 0.5f;
 							}
 						}
 						g_Player[i].jump = FALSE;

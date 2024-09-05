@@ -77,7 +77,7 @@ void UpdateVariableTile(void)
 
 		if (g_VarTiles[i].type == V_DIRECTIONAL_TRAP)
 		{
-			if (g_VarTiles[i].bullet == NULL && g_VarTiles[i].cooldown == 0)
+			if (g_VarTiles[i].bullet == NULL)
 			{
 				XMFLOAT3 bulPos = g_VarTiles[i].pos;
 				bulPos.x += TILE_WIDTH / 2.0f;
@@ -92,16 +92,23 @@ void UpdateVariableTile(void)
 				{
 					speedH = (g_VarTiles[i].rot.z == 3.14f * 1.5f ? -1.0f : 1.0f) * BULLET_SPEED;
 				}
+
 				g_VarTiles[i].bullet = SetBullet(bulPos);
+				if (g_VarTiles[i].bullet == NULL) continue;
 				g_VarTiles[i].bullet->rot = g_VarTiles[i].rot;
 				g_VarTiles[i].bullet->move = XMFLOAT3(speedH, speedV, 0.0f);
 				g_VarTiles[i].cooldown = 120;
 			}
-			else if (g_VarTiles[i].bullet != NULL && g_VarTiles[i].bullet->use == FALSE)
+			if (!g_VarTiles[i].bullet->use && g_VarTiles[i].cooldown == 0)
 			{
-				g_VarTiles[i].bullet = NULL;
+				g_VarTiles[i].cooldown = 120;
+				XMFLOAT3 bulPos = g_VarTiles[i].pos;
+				bulPos.x += TILE_WIDTH / 2.0f;
+				bulPos.y += TILE_HEIGHT / 2.0f;
+				g_VarTiles[i].bullet->pos = bulPos;
+				g_VarTiles[i].bullet->use = TRUE;
 			}
-			else if (g_VarTiles[i].cooldown > 0)
+			else if (g_VarTiles[i].cooldown > 0 && !g_VarTiles[i].bullet->frozen)
 				g_VarTiles[i].cooldown--;
 		}
 	}

@@ -152,11 +152,11 @@ void UpdateBullet(void)
 				BG* bg = GetBG();
 				if (g_Bullet[i].pos.y < (-g_Bullet[i].h / 2))		// 自分の大きさを考慮して画面外か判定している
 				{
-					g_Bullet[i].use = false;
+					g_Bullet[i].use = FALSE;
 				}
 				if (g_Bullet[i].pos.y > (bg->h + g_Bullet[i].h / 2))	// 自分の大きさを考慮して画面外か判定している
 				{
-					g_Bullet[i].use = false;
+					g_Bullet[i].use = FALSE;
 				}
 
 				// 当たり判定処理
@@ -389,6 +389,6 @@ BULLET* SetBullet(XMFLOAT3 pos)
 			return &g_Bullet[i];							// 1発セットしたので終了する
 		}
 	}
-	return g_Bullet;
+	return NULL;
 }
 
