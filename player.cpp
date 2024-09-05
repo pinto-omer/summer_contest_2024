@@ -690,6 +690,8 @@ void DamagePlayer(PLAYER* player)
 {
 	if (player->framesSinceHit < PLAYER_HIT_IFRAMES) return;
 	player->hp -= 30.0f;
+	if (player->hp < 0.0f)
+		player->hp = 0.0f;
 	player->framesSinceHit = 0;
 }
 
