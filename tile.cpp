@@ -171,6 +171,7 @@ void UpdateTile(void)
 		{
 			// ƒpƒ^[ƒ“‚ÌØ‚è‘Ö‚¦
 			g_Tile[i].patternAnim = (g_Tile[i].patternAnim + 1) % (g_TexturePatternDivide[i].x * g_TexturePatternDivide[i].y);
+			g_Tile[i].countAnim = 0;
 		}
 
 	}

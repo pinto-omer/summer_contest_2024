@@ -202,9 +202,9 @@ void UpdateBullet(void)
 							continue;
 						}
 						TILE tile = GetTile()[field->field[y][x]];
-						if (tile.type != TILE_EMPTY &&
+						if ((tile.type != AIR&&tile.type !=GOAL) &&
 							CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
-								XMFLOAT3(x * tile.w + tile.w / 2.0f, y * tile.h + tile.h / 2.0f, 0.0f), tile.w, tile.h) == TRUE)
+								XMFLOAT3(x * TILE_WIDTH + tile.w / 2.0f, y * TILE_HEIGHT + tile.h / 2.0f, 0.0f), tile.w, tile.h) == TRUE)
 						{
 							g_Bullet[i].use = FALSE;
 							continue;
