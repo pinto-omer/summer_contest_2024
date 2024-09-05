@@ -13,10 +13,10 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(SCREEN_WIDTH)	// ”wŒiƒTƒCƒY
 #define TEXTURE_HEIGHT				(SCREEN_HEIGHT)	// 
-#define TEXTURE_MAX					(3)				// ƒeƒNƒXƒ`ƒƒ‚Ì”
+#define TEXTURE_MAX					(2)				// ƒeƒNƒXƒ`ƒƒ‚Ì”
 
-#define TEXTURE_WIDTH_LOGO			(480)			// ƒƒSƒTƒCƒY
-#define TEXTURE_HEIGHT_LOGO			(80)			// 
+#define TEXTURE_WIDTH_LOGO			(433)			// ƒƒSƒTƒCƒY
+#define TEXTURE_HEIGHT_LOGO			(199)			// 
 
 //*****************************************************************************
 // ƒvƒƒgƒ^ƒCƒvéŒ¾
@@ -32,7 +32,6 @@ static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// ƒeƒNƒXƒ`ƒ
 static char* g_TexturName[TEXTURE_MAX] = {
 	"data/TEXTURE/title_bg.png",
 	"data/TEXTURE/title.png",
-	"data/TEXTURE/effect000.jpg",
 };
 
 
@@ -79,7 +78,7 @@ HRESULT InitTitle(void)
 	g_Use = TRUE;
 	g_w = TEXTURE_WIDTH;
 	g_h = TEXTURE_HEIGHT;
-	g_Pos = XMFLOAT3(g_w / 2.0f, g_h / 2.0f, 0.0f);
+	g_Pos = XMFLOAT3(g_w / 2.0f, g_h *0.33f, 0.0f);
 	g_TexNo = 0;
 
 	g_Load = TRUE;
@@ -172,6 +171,18 @@ void DrawTitle(void)
 
 		// ‚P–‡‚Ìƒ|ƒŠƒSƒ“‚Ì’¸“_‚ÆƒeƒNƒXƒ`ƒƒÀ•W‚ðÝ’è
 		SetSpriteLeftTop(g_VertexBuffer, 0.0f, 0.0f, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0.0f, 0.0f, 1.0f, 1.0f);
+
+		// ƒ|ƒŠƒSƒ“•`‰æ
+		GetDeviceContext()->Draw(4, 0);
+	}
+
+	// ƒ^ƒCƒgƒ‹‚Ì”wŒi‚ð•`‰æ
+	{
+		// ƒeƒNƒXƒ`ƒƒÝ’è
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[1]);
+
+		// ‚P–‡‚Ìƒ|ƒŠƒSƒ“‚Ì’¸“_‚ÆƒeƒNƒXƒ`ƒƒÀ•W‚ðÝ’è
+		SetSprite(g_VertexBuffer, g_Pos.x, g_Pos.y, TEXTURE_WIDTH_LOGO, TEXTURE_HEIGHT_LOGO, 0.0f, 0.0f, 1.0f, 1.0f);
 
 		// ƒ|ƒŠƒSƒ“•`‰æ
 		GetDeviceContext()->Draw(4, 0);
