@@ -285,36 +285,15 @@ void UpdatePlayer(void)
 				if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
 				{
 					BOOL collided = FALSE;
+					BOOL goal = FALSE;
 					float height = g_Player[i].h;
 					float y = g_Player[i].pos.y - height / 2.0f;
 					while (height > 0)
 					{
 						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 4.0f, y, 0));
-						if (tileType != AIR)
-						{
-							collided = TRUE;
-							break;
-						}
-						height -= TILE_HEIGHT;
-						y += TILE_HEIGHT;
-					}
-					if (!collided)
-					{
-						g_Player[i].pos.x += speed;
-						g_Player[i].dir = CHAR_DIR_RIGHT;
-						g_Player[i].texNo = g_Player[i].dir;
-						g_Player[i].moving = TRUE;
-					}
-				}
-				else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
-				{
-					BOOL collided = FALSE;
-					float height = g_Player[i].h;
-					float y = g_Player[i].pos.y - height / 2.0f;
-					while (height > 0)
-					{
-						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 4.0f, y, 0));
-						if (tileType != AIR)
+						if (tileType == GOAL)
+							goal = TRUE;
+						else if (tileType != AIR)
 						{
 							collided = TRUE;
 							break;
@@ -323,12 +302,50 @@ void UpdatePlayer(void)
 						y += TILE_HEIGHT;
 					}
 
-					if (!collided)
+					if (!collided && !goal)
+					{
+						g_Player[i].pos.x += speed;
+						g_Player[i].dir = CHAR_DIR_RIGHT;
+						g_Player[i].texNo = g_Player[i].dir;
+						g_Player[i].moving = TRUE;
+					}
+					else if (!collided)
+					{
+						SetMode(MODE_RESULT);
+						return;
+					}
+				}
+				else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
+				{
+					BOOL collided = FALSE;
+					BOOL goal = FALSE;
+					float height = g_Player[i].h;
+					float y = g_Player[i].pos.y - height / 2.0f;
+					while (height > 0)
+					{
+						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 4.0f, y, 0));
+						if (tileType == GOAL)
+							goal = TRUE;
+						else if (tileType != AIR)
+						{
+							collided = TRUE;
+							break;
+						}
+						height -= TILE_HEIGHT;
+						y += TILE_HEIGHT;
+					}
+
+					if (!collided && !goal)
 					{
 						g_Player[i].pos.x -= speed;
 						g_Player[i].dir = CHAR_DIR_LEFT;
 						g_Player[i].texNo = g_Player[i].dir;
 						g_Player[i].moving = TRUE;
+					}
+					else if (!collided)
+					{
+						SetMode(MODE_RESULT);
+						return;
 					}
 				}
 				//field edit debug
@@ -358,27 +375,6 @@ void UpdatePlayer(void)
 					}
 				}
 
-
-
-
-
-				// 力業ジャンプ処理
-				//if (g_jumpCnt > 0)
-				//{
-				//	g_Player[i].pos.y += g_jump[g_jumpCnt];
-				//	g_jumpCnt++;
-				//	if (g_jumpCnt >= PLAYER_JUMP_CNT_MAX)
-				//	{
-				//		g_jumpCnt = 0;
-				//	}
-				//}
-
-				//if ((g_jumpCnt == 0) && (GetKeyboardTrigger(DIK_J)))
-				//{
-				//	g_Player[i].pos.y += g_jump[g_jumpCnt];
-				//	g_jumpCnt++;
-				//}
-
 				if (GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == AIR &&
 					g_Player[i].jump == FALSE)
 				{
@@ -403,6 +399,11 @@ void UpdatePlayer(void)
 						int type = GetTileType(pPos);
 						if (type != AIR)
 						{
+							if (type == GOAL)
+							{
+								SetMode(MODE_RESULT);
+								return;
+							}
 							if (type != TYPE_ARROW)
 								g_Player[i].pos.y = (int)(g_Player[i].pos.y / GetTile()->h) * GetTile()->h + g_Player[i].h / 2.0f;
 							else
@@ -432,10 +433,16 @@ void UpdatePlayer(void)
 					int type = GetTileType(pPos);
 					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2 &&
 						(type == GROUND ||
-						 type == TYPE_ARROW))
+							type == TYPE_ARROW ||
+							type == GOAL))
 					{
 						if (type == GROUND)
-						g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y - g_Player[i].h / 2.0f;
+							g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y - g_Player[i].h / 2.0f;
+						else if (type == GOAL)
+						{
+							SetMode(MODE_RESULT);
+							return;
+						}
 						else
 						{
 							BULLET* bullet = GetBullet();
@@ -521,45 +528,6 @@ void UpdatePlayer(void)
 				bg->pos.y = g_Player[i].pos.y - PLAYER_DISP_Y;
 				if (bg->pos.y < 0) bg->pos.y = 0;
 				if (bg->pos.y > bg->h - SCREEN_HEIGHT) bg->pos.y = bg->h - SCREEN_HEIGHT;
-
-				// 移動が終わったらエネミーとの当たり判定
-				{
-					ENEMY* enemy = GetEnemy();
-
-					// エネミーの数分当たり判定を行う
-					for (int j = 0; j < ENEMY_MAX; j++)
-					{
-						// 生きてるエネミーと当たり判定をする
-						if (enemy[j].use == TRUE)
-						{
-							BOOL ans = CollisionBB(g_Player[i].pos, g_Player[i].w, g_Player[i].h,
-								enemy[j].pos, enemy[j].w, enemy[j].h);
-							// 当たっている？
-							if (ans == TRUE)
-							{
-								// 当たった時の処理
-								enemy[j].use = FALSE;
-								AddScore(10);
-							}
-						}
-					}
-				}
-
-				// バレット処理
-				//if (GetKeyboardTrigger(DIK_SPACE))
-				//{
-				//	XMFLOAT3 pos = g_Player[i].pos;
-				//	pos.y += g_Player[i].jumpY;
-				//	SetBullet(pos);
-				//}
-
-				/*if (IsButtonTriggered(0, BUTTON_B))
-				{
-					XMFLOAT3 pos = g_Player[i].pos;
-					pos.y += g_Player[i].jumpY;
-					SetBullet(pos);
-				}*/
-
 			}
 		}
 	}
@@ -657,11 +625,11 @@ void DrawPlayer(void)
 				// ポリゴン描画
 				GetDeviceContext()->Draw(4, 0);
 			}
-			// プレイヤーの分身を描画
-			if (g_Player[i].dash)
-			{	// ダッシュ中だけ分身処理
-				DrawPlayerOffset(i);
-			}
+			//// プレイヤーの分身を描画
+			//if (g_Player[i].dash)
+			//{	// ダッシュ中だけ分身処理
+			//	DrawPlayerOffset(i);
+			//}
 			if (g_Player[i].framesSinceHit > PLAYER_HIT_IFRAMES ||
 				g_Player[i].framesSinceHit % 5 < 3)
 			{

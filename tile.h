@@ -33,6 +33,7 @@ enum {//	TILE_PLAYER = -2,
 	TILE_WALL,
 	TILE_TRAP,
 	TILE_FROZEN_ARROW,
+	TILE_GOAL,
 	TILE_MAX
 };
 
@@ -43,6 +44,7 @@ enum {
 	MOVING,
 	DIRECTIONAL,
 	TYPE_ARROW,
+	GOAL,
 	TILE_TYPE_MAX
 };
 //*****************************************************************************

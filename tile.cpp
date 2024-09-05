@@ -43,6 +43,16 @@ static char* g_TexturName[] = {
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_37.png",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_29.png",
 	"",
+	"data/TEXTURE/flag.png",
+};
+
+static XMINT2 g_TexturePatternDivide[] = {
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(7,1),
 };
 
 static BOOL		g_Load = FALSE;			// 初期化を行ったかのフラグ
@@ -55,7 +65,6 @@ static TILE	g_Tile[TILE_MAX];	// バレット構造体
 HRESULT InitTile(void)
 {
 	ID3D11Device* pDevice = GetDevice();
-
 	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
@@ -101,6 +110,9 @@ HRESULT InitTile(void)
 	g_Tile[TILE_FROZEN_ARROW].type = TYPE_ARROW;
 	g_Tile[TILE_FROZEN_ARROW].h = BULLET_HEIGHT;
 	g_Tile[TILE_FROZEN_ARROW].w = BULLET_WIDTH;
+	
+	g_Tile[TILE_GOAL].type = GOAL;
+
 
 	g_Load = TRUE;
 	return S_OK;
@@ -158,7 +170,7 @@ void UpdateTile(void)
 		if ((g_Tile[i].countAnim % ANIM_WAIT) == 0)
 		{
 			// パターンの切り替え
-			g_Tile[i].patternAnim = (g_Tile[i].patternAnim + 1) % ANIM_PATTERN_NUM;
+			g_Tile[i].patternAnim = (g_Tile[i].patternAnim + 1) % (g_TexturePatternDivide[i].x * g_TexturePatternDivide[i].y);
 		}
 
 	}
@@ -200,10 +212,10 @@ void DrawTile(int tileIDX, XMFLOAT3 pos, BOOL isEditTile, int varTileID)
 	float pw = g_Tile[tileIDX].w;		// バレットの表示幅
 	float ph = g_Tile[tileIDX].h;		// バレットの表示高さ
 
-	float tw = 1.0f / TEXTURE_PATTERN_DIVIDE_X;	// テクスチャの幅
-	float th = 1.0f / TEXTURE_PATTERN_DIVIDE_Y;	// テクスチャの高さ
-	float tx = (float)(g_Tile[tileIDX].patternAnim % TEXTURE_PATTERN_DIVIDE_X) * tw;	// テクスチャの左上X座標
-	float ty = (float)(g_Tile[tileIDX].patternAnim / TEXTURE_PATTERN_DIVIDE_X) * th;	// テクスチャの左上Y座標
+	float tw = 1.0f / g_TexturePatternDivide[tileIDX].x;	// テクスチャの幅
+	float th = 1.0f / g_TexturePatternDivide[tileIDX].y;	// テクスチャの高さ
+	float tx = (float)(g_Tile[tileIDX].patternAnim % g_TexturePatternDivide[tileIDX].x) * tw;	// テクスチャの左上X座標
+	float ty = (float)(g_Tile[tileIDX].patternAnim / g_TexturePatternDivide[tileIDX].x) * th;	// テクスチャの左上Y座標
 	float alpha = isEditTile == TRUE ? 0.7f : 1.0f;
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
 	if (varTileID == -1)
