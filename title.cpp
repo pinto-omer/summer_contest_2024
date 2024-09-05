@@ -26,10 +26,10 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ID3D11Buffer				*g_VertexBuffer = NULL;				// 頂点情報
-static ID3D11ShaderResourceView	*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11Buffer* g_VertexBuffer = NULL;				// 頂点情報
+static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
-static char *g_TexturName[TEXTURE_MAX] = {
+static char* g_TexturName[TEXTURE_MAX] = {
 	"data/TEXTURE/title_bg.png",
 	"data/TEXTURE/title.png",
 	"data/TEXTURE/effect000.jpg",
@@ -41,13 +41,8 @@ static float					g_w, g_h;					// 幅と高さ
 static XMFLOAT3					g_Pos;						// ポリゴンの座標
 static int						g_TexNo;					// テクスチャ番号
 
-float	alpha;
-BOOL	flag_alpha;
-
 static BOOL						g_Load = FALSE;
 
-static float	effect_dx;
-static float	effect_dy;
 
 
 //=============================================================================
@@ -55,7 +50,7 @@ static float	effect_dy;
 //=============================================================================
 HRESULT InitTitle(void)
 {
-	ID3D11Device *pDevice = GetDevice();
+	ID3D11Device* pDevice = GetDevice();
 
 	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
@@ -81,17 +76,11 @@ HRESULT InitTitle(void)
 
 
 	// 変数の初期化
-	g_Use   = TRUE;
-	g_w     = TEXTURE_WIDTH;
-	g_h     = TEXTURE_HEIGHT;
-	g_Pos   = XMFLOAT3(g_w/2, g_h/2, 0.0f);
+	g_Use = TRUE;
+	g_w = TEXTURE_WIDTH;
+	g_h = TEXTURE_HEIGHT;
+	g_Pos = XMFLOAT3(g_w / 2.0f, g_h / 2.0f, 0.0f);
 	g_TexNo = 0;
-
-	alpha = 1.0f;
-	flag_alpha = TRUE;
-
-	effect_dx = 100.0f;
-	effect_dy = 100.0f;
 
 	g_Load = TRUE;
 	return S_OK;
@@ -128,50 +117,23 @@ void UninitTitle(void)
 void UpdateTitle(void)
 {
 
-	if (GetKeyboardTrigger(DIK_RETURN))
-	{// Enter押したら、ステージを切り替える
-		SetFade(FADE_OUT, MODE_GAME);
-	}
-	// ゲームパッドで入力処理
-	else if (IsButtonTriggered(0, BUTTON_START))
-	{
-		SetFade(FADE_OUT, MODE_GAME);
-	}
-	else if (IsButtonTriggered(0, BUTTON_B))
-	{
+	if (GetKeyboardTrigger(DIK_RETURN) ||
+		IsButtonTriggered(0, BUTTON_START) ||
+		IsButtonTriggered(0, BUTTON_B))
+	{//ステージを切り替える
 		SetFade(FADE_OUT, MODE_GAME);
 	}
 
-
-
-	// セーブデータをロードする？
-	if (GetKeyboardTrigger(DIK_L))
-	{
-		SetLoadGame(TRUE);
-		SetFade(FADE_OUT, MODE_GAME);
-	}
-
-
-	// テストでエフェクトの発生場所を移動させる
-	float speed = 4.0f;
+	
 
 	if (GetKeyboardPress(DIK_DOWN))
 	{
-		effect_dy += speed;
 	}
 	else if (GetKeyboardPress(DIK_UP))
 	{
-		effect_dy -= speed;
 	}
 
-	if (GetKeyboardPress(DIK_RIGHT))
-	{
-		effect_dx += speed;
-	}
-	else if (GetKeyboardPress(DIK_LEFT))
-	{
-		effect_dx -= speed;
-	}
+	
 
 
 #ifdef _DEBUG	// デバッグ情報を表示する
@@ -214,32 +176,6 @@ void DrawTitle(void)
 		// ポリゴン描画
 		GetDeviceContext()->Draw(4, 0);
 	}
-
-
-	// 加減算のテスト
-	SetBlendState(BLEND_MODE_ADD);		// 加算合成
-//	SetBlendState(BLEND_MODE_SUBTRACT);	// 減算合成
-		
-	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[2]);
-	
-	for (int i = 0; i < 30; i++)
-	{
-		// １枚のポリゴンの頂点とテクスチャ座標を設定
-		float dx = effect_dx;
-		float dy = effect_dy;
-		float sx = (float)(rand() % 100);
-		float sy = (float)(rand() % 100);
-
-		SetSpriteColor(g_VertexBuffer, dx + sx, dy + sy, 50, 50, 0.0f, 0.0f, 1.0f, 1.0f,
-			XMFLOAT4(1.0f, 0.3f, 1.0f, 0.5f));
-
-		// ポリゴン描画
-		GetDeviceContext()->Draw(4, 0);
-	}
-	SetBlendState(BLEND_MODE_ALPHABLEND);	// 半透明処理を元に戻す
-
-
 }
 
 
