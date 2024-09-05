@@ -263,7 +263,7 @@ void UpdatePlayer(void)
 				g_Player[i].moving = FALSE;
 				g_Player[i].dash = FALSE;
 
-				
+
 
 				/*	if (GetKeyboardPress(DIK_DOWN))
 					{
@@ -408,9 +408,13 @@ void UpdatePlayer(void)
 								for (int j = 0; j < BULLET_MAX; j++)
 								{
 									if (!bullet[j].use || !bullet[j].frozen) continue;
-									else if (bullet[j].frozen &&
-										CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.33f, bullet[j].h))
-										g_Player[i].pos.y = bullet[j].pos.y + bullet[j].w * 0.33f + g_Player[j].h * 0.5f;
+									else if (bullet[j].frozen)
+										if ((bullet[j].rot.z == 0.0f || bullet[j].rot.z == 3.14f) &&
+											CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.5f, bullet[j].h))
+											g_Player[i].pos.y = bullet[j].pos.y + bullet[j].w * 0.5f + g_Player[j].h * 0.5f;
+										else if ((bullet[j].rot.z != 0.0f && bullet[j].rot.z != 3.14f) &&
+											CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].h, bullet[j].w * 0.5f))
+											g_Player[i].pos.y = bullet[j].pos.y + bullet[j].h * 0.5f + g_Player[j].h * 0.5f;
 								}
 							}
 							g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX;
