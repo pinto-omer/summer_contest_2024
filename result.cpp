@@ -8,17 +8,19 @@
 #include "input.h"
 #include "score.h"
 #include "fade.h"
-
+#include "player.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
 #define TEXTURE_WIDTH				(SCREEN_WIDTH)	// 背景サイズ
 #define TEXTURE_HEIGHT				(SCREEN_HEIGHT)	// 
-#define TEXTURE_MAX					(3)				// テクスチャの数
+#define TEXTURE_MAX					(6)				// テクスチャの数
 
 #define TEXTURE_WIDTH_LOGO			(480)			// ロゴサイズ
 #define TEXTURE_HEIGHT_LOGO			(80)			// 
 
+#define ANIM_WAIT					(8)
+#define TEXTURE_PATTERN_DIVIDE_X	(5)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -27,21 +29,31 @@
 //*****************************************************************************
 // グローバル変数
 //*****************************************************************************
-static ID3D11Buffer				*g_VertexBuffer = NULL;		// 頂点情報
-static ID3D11ShaderResourceView	*g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11Buffer* g_VertexBuffer = NULL;		// 頂点情報
+static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
-static char *g_TexturName[TEXTURE_MAX] = {
-	"data/TEXTURE/bg001.jpg",
-	"data/TEXTURE/result_logo.png",
-	"data/TEXTURE/number16x32.png",
+static char* g_TexturName[TEXTURE_MAX] = {
+	"data/TEXTURE/menu/gameclear.png",
+	"data/TEXTURE/menu/gameover.png",
+	"data/TEXTURE/clearbg.png",
+	"data/TEXTURE/gameoverbg.png",
+	"data/TEXTURE/Enchantress/Dead.png",
 };
 
+enum {
+	CLEAR,
+	OVER,
+	CLEAR_BG,
+	OVER_BG,
+	DEAD,
+};
 
 static BOOL						g_Use;						// TRUE:使っている  FALSE:未使用
 static float					g_w, g_h;					// 幅と高さ
 static XMFLOAT3					g_Pos;						// ポリゴンの座標
 static int						g_TexNo;					// テクスチャ番号
-
+static float					g_countAnim;
+static int						g_patternAnim;
 static BOOL						g_Load = FALSE;
 
 //=============================================================================
@@ -49,7 +61,7 @@ static BOOL						g_Load = FALSE;
 //=============================================================================
 HRESULT InitResult(void)
 {
-	ID3D11Device *pDevice = GetDevice();
+	ID3D11Device* pDevice = GetDevice();
 
 	//テクスチャ生成
 	for (int i = 0; i < TEXTURE_MAX; i++)
@@ -75,12 +87,14 @@ HRESULT InitResult(void)
 
 
 	// 変数の初期化
-	g_Use   = TRUE;
-	g_w     = TEXTURE_WIDTH;
-	g_h     = TEXTURE_HEIGHT;
-	g_Pos   = { g_w / 2, 50.0f, 0.0f };
+	g_Use = TRUE;
+	g_w = TEXTURE_WIDTH;
+	g_h = TEXTURE_HEIGHT;
+	g_Pos = { g_w / 2.0f, g_h * 0.33f, 0.0f };
 	g_TexNo = 0;
 
+	g_patternAnim = 0;
+	g_countAnim = 0.0f;
 	// BGM再生
 
 
@@ -118,24 +132,35 @@ void UninitResult(void)
 //=============================================================================
 void UpdateResult(void)
 {
-
-	if (GetKeyboardTrigger(DIK_RETURN))
-	{// Enter押したら、ステージを切り替える
-		SetFade(FADE_OUT, MODE_TITLE);
-	}
-	// ゲームパッドで入力処理
-	else if (IsButtonTriggered(0, BUTTON_START))
+	if (GetGameOverStatus() == GAME_OVER && g_patternAnim < TEXTURE_PATTERN_DIVIDE_X - 1)
 	{
-		SetFade(FADE_OUT, MODE_TITLE);
+		g_countAnim++;
+		if (g_countAnim >= ANIM_WAIT)
+		{
+			g_patternAnim++;
+			g_countAnim = 0;
+		}
 	}
-	else if (IsButtonTriggered(0, BUTTON_B))
+	else
 	{
-		SetFade(FADE_OUT, MODE_TITLE);
+		if (GetKeyboardTrigger(DIK_RETURN))
+		{// Enter押したら、ステージを切り替える
+			SetFade(FADE_OUT, MODE_TITLE);
+		}
+		// ゲームパッドで入力処理
+		else if (IsButtonTriggered(0, BUTTON_START))
+		{
+			SetFade(FADE_OUT, MODE_TITLE);
+		}
+		else if (IsButtonTriggered(0, BUTTON_B))
+		{
+			SetFade(FADE_OUT, MODE_TITLE);
 	}
+}
 
 
 #ifdef _DEBUG	// デバッグ情報を表示する
-	
+
 #endif
 
 }
@@ -165,7 +190,7 @@ void DrawResult(void)
 	// リザルトの背景を描画
 	{
 		// テクスチャ設定
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[0]);
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[GetGameOverStatus() == GAME_CLEAR ? CLEAR_BG : OVER_BG]);
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
 		SetSpriteLeftTop(g_VertexBuffer, 0.0f, 0.0f, g_w, g_h, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -177,7 +202,7 @@ void DrawResult(void)
 	// リザルトのロゴを描画
 	{
 		// テクスチャ設定
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[1]);
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[GetGameOverStatus() == GAME_CLEAR ? CLEAR : OVER]);
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
 		SetSprite(g_VertexBuffer, g_Pos.x, g_Pos.y, TEXTURE_WIDTH_LOGO, TEXTURE_HEIGHT_LOGO, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -185,46 +210,10 @@ void DrawResult(void)
 		// ポリゴン描画
 		GetDeviceContext()->Draw(4, 0);
 	}
-
-
-	// スコア表示
+	if (GetGameOverStatus() == GAME_OVER)
 	{
-		// テクスチャ設定
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[2]);
-
-		// 桁数分処理する
-		int number = GetScore();
-		for (int i = 0; i < SCORE_DIGIT; i++)
-		{
-			// 今回表示する桁の数字
-			float x = (float)(number % 10);
-
-			// スコアの位置やテクスチャー座標を反映
-			float pw = 16*4;			// スコアの表示幅
-			float ph = 32*4;			// スコアの表示高さ
-			float px = 600.0f - i*pw;	// スコアの表示位置X
-			float py = 300.0f;			// スコアの表示位置Y
-
-			float tw = 1.0f / 10;		// テクスチャの幅
-			float th = 1.0f / 1;		// テクスチャの高さ
-			float tx = x * tw;			// テクスチャの左上X座標
-			float ty = 0.0f;			// テクスチャの左上Y座標
-
-			// １枚のポリゴンの頂点とテクスチャ座標を設定
-			SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-				XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
-
-			// ポリゴン描画
-			GetDeviceContext()->Draw(4, 0);
-
-			// 次の桁へ
-			number /= 10;
-		}
 
 	}
-
-
-
 }
 
 
