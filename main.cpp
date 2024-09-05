@@ -301,6 +301,7 @@ void Update(void)
 	UpdateCamera();
 
 	// モードによって処理を分ける
+	if (GetFade() != FADE_OUT)
 	switch (g_Mode)
 	{
 	case MODE_TITLE:		// タイトル画面の更新
@@ -319,7 +320,7 @@ void Update(void)
 		UpdatePlayer();
 //		UpdateEnemy();
 		UpdateBullet();
-		UpdateEffect();
+	//	UpdateEffect();
 		UpdateOverlay();
 
 		if(GetFade() == FADE_NONE)
@@ -327,7 +328,6 @@ void Update(void)
 			int ans = CheckGameClear();
 			if (ans != 0)
 			{
-				//SetMode(MODE_RESULT);
 				SetFade(FADE_OUT, MODE_RESULT);
 			}
 		}
@@ -371,7 +371,7 @@ void Draw(void)
 	case MODE_EDITOR:
 		DrawBG();
 		DrawField();
-		DrawEffect();
+	//	DrawEffect();
 		DrawPlayer();
 		DrawEditor();
 		break;
@@ -381,7 +381,7 @@ void Draw(void)
 		DrawBullet();		// 重なる順番を意識してね
 	//	DrawEnemy();
 		DrawPlayer();
-		DrawEffect();
+	//	DrawEffect();
 		DrawOverlay();
 		break;
 
@@ -458,7 +458,7 @@ void SetMode(int mode)
 	UninitResult();
 
 	// エフェクトの終了処理
-	UninitEffect();
+	//UninitEffect();
 
 	UninitEditor();
 
@@ -474,7 +474,7 @@ void SetMode(int mode)
 	case MODE_EDITOR:
 		InitBG();
 		InitField();
-		InitEffect();
+	//	InitEffect();
 		InitPlayer();
 		InitEditor();
 		break;
@@ -485,7 +485,7 @@ void SetMode(int mode)
 		InitPlayer();
 		//InitEnemy();
 		InitBullet();
-		InitEffect();
+	//	InitEffect();
 		InitOverlay();
 
 		// ロードゲームだったらすべての初期化が終わった後にセーブデータを読み込む
@@ -522,22 +522,7 @@ int GetMode(void)
 //=============================================================================
 int CheckGameClear(void)
 {
-
-	// エネミーの数が０ならプレイヤーの勝ちとする
-	int cnt = GetEnemyCount();
-	if(cnt <= 0)
-	{
-		return 1;	// プレイヤーの勝ち
-	}
-
-	// プレイヤーの数が０ならエネミーの勝ちとする
-	cnt = GetPlayerCount();
-	if (cnt <= 0)
-	{
-		return 2;	// エネミーの勝ち
-	}
-
-	return 0;		// ゲーム継続
+	return GetGameOverStatus();		// ゲーム継続
 }
 
 

@@ -92,6 +92,7 @@ static int		g_jump[PLAYER_JUMP_CNT_MAX] =
 	  1,   2,   3,   4,   5,   6,  7,  8,  9, 10, 11,12,13,14,15
 };
 
+static int		gameOverStatus;
 //=============================================================================
 // èâä˙âªèàóù
 //=============================================================================
@@ -161,7 +162,7 @@ HRESULT InitPlayer(void)
 		g_Player[i].hp = PLAYER_MAX_HP;
 		g_Player[i].framesSinceHit = 0;
 	}
-
+	gameOverStatus = 0;
 
 	g_Load = TRUE;
 	return S_OK;
@@ -211,7 +212,7 @@ void UpdatePlayer(void)
 			XMFLOAT3 pos_old = g_Player[i].pos;
 			if (g_Player[i].hp <= 0)
 			{
-				SetMode(MODE_RESULT);
+				gameOverStatus = GAME_OVER;
 				return;
 			}
 			else if (g_Player[i].hp > PLAYER_MAX_HP)
@@ -311,7 +312,7 @@ void UpdatePlayer(void)
 					}
 					else if (!collided)
 					{
-						SetMode(MODE_RESULT);
+						gameOverStatus = GAME_CLEAR;
 						return;
 					}
 				}
@@ -344,7 +345,7 @@ void UpdatePlayer(void)
 					}
 					else if (!collided)
 					{
-						SetMode(MODE_RESULT);
+						gameOverStatus = GAME_CLEAR;
 						return;
 					}
 				}
@@ -401,7 +402,7 @@ void UpdatePlayer(void)
 						{
 							if (type == GOAL)
 							{
-								SetMode(MODE_RESULT);
+								gameOverStatus = GAME_CLEAR;
 								return;
 							}
 							if (type != TYPE_ARROW)
@@ -440,7 +441,7 @@ void UpdatePlayer(void)
 							g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y - g_Player[i].h / 2.0f;
 						else if (type == GOAL)
 						{
-							SetMode(MODE_RESULT);
+							gameOverStatus = GAME_CLEAR;
 							return;
 						}
 						else
@@ -514,7 +515,7 @@ void UpdatePlayer(void)
 				else if (g_Player[i].pos.y > bg->h - (g_Player[i].h / 2.0f))
 				{
 					g_Player[i].hp = 0.0f;
-					SetMode(MODE_RESULT);
+					gameOverStatus = GAME_OVER;
 					return;
 				}
 
@@ -734,5 +735,8 @@ void DrawPlayerOffset(int no)
 	}
 }
 
-
+int GetGameOverStatus(void)
+{
+	return gameOverStatus;
+}
 

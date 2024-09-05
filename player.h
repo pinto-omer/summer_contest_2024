@@ -32,7 +32,12 @@ enum
 	CHAR_DIR_MAX
 };
 
-
+enum
+{
+	GAME_NOT_OVER,
+	GAME_OVER,
+	GAME_CLEAR,
+};
 //*****************************************************************************
 // ç\ë¢ëÃíËã`
 //*****************************************************************************
@@ -82,3 +87,4 @@ PLAYER* GetPlayer(void);
 int GetPlayerCount(void);
 void DamagePlayer(PLAYER* player);
 
+int GetGameOverStatus(void);
