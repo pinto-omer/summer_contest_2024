@@ -344,6 +344,10 @@ void UpdatePlayer(void)
 						return;
 					}
 				}
+				else if (GetKeyboardTrigger(DIK_ESCAPE))
+				{
+					ToggleMenu();
+				}
 				//field edit debug
 				if (GetKeyboardTrigger(DIK_F5))
 				{

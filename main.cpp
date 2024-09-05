@@ -88,7 +88,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	};
 	HWND		hWnd;
 	MSG			msg;
-	
+
 	// ウィンドウクラスの登録
 	RegisterClassEx(&wcex);
 
@@ -124,7 +124,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//}
 
 	// 初期化処理(ウィンドウを作成してから行う)
-	if(FAILED(Init(hInstance, hWnd, mode)))
+	if (FAILED(Init(hInstance, hWnd, mode)))
 	{
 		return -1;
 	}
@@ -137,13 +137,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	// ウインドウの表示(初期化処理の後に呼ばないと駄目)
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
-	
+
 	// メッセージループ
-	while(1)
+	while (g_Mode != MODE_MAX)
 	{
-		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
-			if(msg.message == WM_QUIT)
+			if (msg.message == WM_QUIT)
 			{// PostQuitMessage()が呼ばれたらループ終了
 				break;
 			}
@@ -153,7 +153,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-        }
+		}
 		else
 		{
 			dwCurrentTime = timeGetTime();
@@ -205,14 +205,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 //=============================================================================
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch(message)
+	switch (message)
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
 
 	case WM_KEYDOWN:
-		switch(wParam)
+		switch (wParam)
 		{
 		case VK_ESCAPE:
 			//DestroyWindow(hWnd);
@@ -302,42 +302,56 @@ void Update(void)
 
 	// モードによって処理を分ける
 	if (GetFade() != FADE_OUT)
-	switch (g_Mode)
-	{
-	case MODE_TITLE:		// タイトル画面の更新
-		UpdateTitle();
-		break;
-	case MODE_EDITOR:
-		UpdateBG();
-		UpdateField();
-		UpdateEffect();
-		UpdatePlayer();
-		UpdateEditor();
-		break;
-	case MODE_GAME:			// ゲーム画面の更新
-		UpdateBG();
-		UpdateField();
-		UpdatePlayer();
-//		UpdateEnemy();
-		UpdateBullet();
-	//	UpdateEffect();
-		UpdateOverlay();
-
-		if(GetFade() == FADE_NONE)
-		{	// 全滅チェック
-			int ans = CheckGameClear();
-			if (ans != 0)
+		switch (g_Mode)
+		{
+		case MODE_TITLE:		// タイトル画面の更新
+			if (isMenu)
+				UpdateMenu();
+			else
+				UpdateTitle();
+			break;
+		case MODE_EDITOR:
+			if (!isMenu)
 			{
-				SetFade(FADE_OUT, MODE_RESULT);
+				UpdateBG();
+				UpdateField();
+				UpdateEffect();
+				UpdatePlayer();
+				UpdateEditor();
 			}
+			else
+			{
+				UpdateMenu();
+			}
+			break;
+		case MODE_GAME:			// ゲーム画面の更新
+			if (!isMenu)
+			{
+				UpdateBG();
+				UpdateField();
+				UpdatePlayer();
+				//		UpdateEnemy();
+				UpdateBullet();
+				//	UpdateEffect();
+				UpdateOverlay();
+
+				if (GetFade() == FADE_NONE)
+				{	// 全滅チェック
+					int ans = CheckGameClear();
+					if (ans != 0)
+					{
+						SetFade(FADE_OUT, MODE_RESULT);
+					}
+				}
+			}
+			else
+				UpdateMenu();
+			break;
+
+		case MODE_RESULT:		// リザルト画面の更新
+			UpdateResult();
+			break;
 		}
-
-		break;
-
-	case MODE_RESULT:		// リザルト画面の更新
-		UpdateResult();
-		break;
-	}
 
 	UpdateFade();			// フェードの更新処理
 }
@@ -367,22 +381,27 @@ void Draw(void)
 	{
 	case MODE_TITLE:		// タイトル画面の描画
 		DrawTitle();
+		DrawMenu();
 		break;
 	case MODE_EDITOR:
 		DrawBG();
 		DrawField();
-	//	DrawEffect();
+		//	DrawEffect();
 		DrawPlayer();
 		DrawEditor();
+		if (isMenu)
+			DrawMenu();
 		break;
 	case MODE_GAME:			// ゲーム画面の描画
 		DrawBG();
 		DrawField();
 		DrawBullet();		// 重なる順番を意識してね
-	//	DrawEnemy();
+		//	DrawEnemy();
 		DrawPlayer();
-	//	DrawEffect();
+		//	DrawEffect();
 		DrawOverlay();
+		if (isMenu)
+			DrawMenu();
 		break;
 
 	case MODE_RESULT:		// リザルト画面の描画
@@ -478,7 +497,7 @@ void SetMode(int mode)
 	case MODE_EDITOR:
 		InitBG();
 		InitField();
-	//	InitEffect();
+		//	InitEffect();
 		InitPlayer();
 		InitEditor();
 		break;
@@ -489,10 +508,10 @@ void SetMode(int mode)
 		InitPlayer();
 		//InitEnemy();
 		InitBullet();
-	//	InitEffect();
+		//	InitEffect();
 		InitOverlay();
 
-		
+
 
 		//PlaySound(SOUND_LABEL_BGM_bgm);
 		break;

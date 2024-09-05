@@ -17,7 +17,7 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(250)	// キャラサイズ
 #define TEXTURE_HEIGHT				(50)	// 
-#define TEXTURE_MAX					(11)		// テクスチャの数
+#define TEXTURE_MAX					(12)		// テクスチャの数
 
 #define TEXTURE_WIDTH_SELECT		(50)	// キャラサイズ
 #define TEXTURE_HEIGHT_SELECT		(50)	// 
@@ -31,7 +31,7 @@
 // グローバル変数
 //*****************************************************************************
 static ID3D11Buffer* g_VertexBuffer = NULL;		// 頂点情報
-static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
+static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX + 1] = { NULL };	// テクスチャ情報
 
 static char* g_TexturName[] = {
 	"data/TEXTURE/fade_black.png",
@@ -48,7 +48,7 @@ static char* g_TexturName[] = {
 	"data/TEXTURE/menu/start.png",
 };
 
-static char g_SelectTextureName[] = "data/TEXTURE/select.png";
+static char g_SelectTextureName[] = "data/TEXTURE/menu/select.png";
 
 
 enum {
@@ -92,7 +92,15 @@ HRESULT InitMenu(void)
 			&g_Texture[i],
 			NULL);
 	}
-	for (int i = 0; i < MODE_MAX+1; i++)
+	g_Texture[TEXTURE_MAX] = NULL;
+	D3DX11CreateShaderResourceViewFromFile(GetDevice(),
+		g_SelectTextureName,
+		NULL,
+		NULL,
+		&g_Texture[TEXTURE_MAX],
+		NULL);
+
+	for (int i = 0; i < MODE_MAX + 1; i++)
 	{
 		for (int j = 0; j < TEXTURE_MAX; j++)
 		{
@@ -134,7 +142,7 @@ HRESULT InitMenu(void)
 	isLevelSelect = FALSE;
 	g_w = TEXTURE_WIDTH;
 	g_h = TEXTURE_HEIGHT;
-	g_Pos = { SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.33f, 0.0f };
+	g_Pos = { (SCREEN_WIDTH - g_w) * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f };
 	g_Menu = -1;
 	g_MaxIndex = -1;
 	g_MenuIndex = 0;
@@ -153,14 +161,14 @@ void UninitMenu(void)
 		g_VertexBuffer = NULL;
 	}
 
-	for (int i = 0; i < TEXTURE_MAX; i++)
+	for (int i = 0; i < TEXTURE_MAX + 1; i++)
 	{
 		if (g_Texture[i])
 		{
 			g_Texture[i]->Release();
 			g_Texture[i] = NULL;
 		}
-	} 
+	}
 
 }
 
@@ -172,6 +180,7 @@ void UpdateMenu(void)
 
 	if (g_Menu == -1)
 		g_Menu = GetMode();
+	g_MaxIndex = -1;
 	for (int i = 0; i < TEXTURE_MAX; i++)
 	{
 		if (g_ModeMenus[g_Menu][i] == -1) break;
@@ -184,20 +193,21 @@ void UpdateMenu(void)
 	}
 	else if (GetKeyboardTrigger(DIK_DOWN) || IsButtonTriggered(0, BUTTON_DOWN))
 	{
-		g_MenuIndex += g_MenuIndex < g_MaxIndex - 1 ? 1 : 0;
+		g_MenuIndex += g_MenuIndex < g_MaxIndex ? 1 : 0;
 	}
 	else if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_DOWN))
 	{
 		switch (g_ModeMenus[g_Menu][g_MenuIndex])
 		{
 		case BACK:
-			g_Menu = -1;
+			g_Menu = GetMode();
 			g_MenuIndex = 0;
 			break;
 		case EXIT:
-			SetFade(FADE_OUT,MODE_MAX);
+			SetFade(FADE_OUT, MODE_MAX);
 			break;
 		case LEVEL_EDITOR:
+			SetField(0);
 			SetFade(FADE_OUT, MODE_EDITOR);
 			break;
 		case LOAD:
@@ -215,7 +225,14 @@ void UpdateMenu(void)
 			}
 			else
 			{
-				LoadField(1);
+				if (GetMode() == MODE_GAME)
+				{
+					SetFade(FADE_OUT, MODE_GAME);
+					SetField(1);
+					return;
+				}
+				else
+					LoadField(1);
 			}
 			ToggleMenu();
 			break;
@@ -226,7 +243,14 @@ void UpdateMenu(void)
 			}
 			else
 			{
-				LoadField(2);
+				if (GetMode() == MODE_GAME)
+				{
+					SetFade(FADE_OUT, MODE_GAME);
+					SetField(2);
+					return;
+				}
+				else
+					LoadField(2);
 			}
 			ToggleMenu();
 			break;
@@ -237,7 +261,14 @@ void UpdateMenu(void)
 			}
 			else
 			{
-				LoadField(3);
+				if (GetMode() == MODE_GAME)
+				{
+					SetFade(FADE_OUT, MODE_GAME);
+					SetField(3);
+					return;
+				}
+				else
+					LoadField(3);
 			}
 			ToggleMenu();
 			break;
@@ -247,15 +278,21 @@ void UpdateMenu(void)
 		case SAVE:
 			g_Menu = MODE_MAX;
 			g_MenuIndex = 0;
-			isSave = FALSE;
+			isSave = TRUE;
 			break;
 		case START:
+			SetField(0);
 			SetFade(FADE_OUT, MODE_GAME);
 			break;
 		}
 	}
 
-
+	g_MaxIndex = -1;
+	for (int i = 0; i < TEXTURE_MAX; i++)
+	{
+		if (g_ModeMenus[g_Menu][i] == -1) break;
+		g_MaxIndex++;
+	}
 #ifdef _DEBUG	// デバッグ情報を表示する
 	//char *str = GetDebugStr();
 	//sprintf(&str[strlen(str)], " PX:%.2f PY:%.2f", g_Pos.x, g_Pos.y);
@@ -307,27 +344,53 @@ void DrawMenu(void)
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 
-	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Menu]);
+	for (int i = 0; i <= g_MaxIndex; i++)
+	{
+		// テクスチャ設定
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_ModeMenus[g_Menu][i]]);
 
-	float percent = GetPlayer()->hp / PLAYER_MAX_HP;
-	// スコアの位置やテクスチャー座標を反映
-	px = g_Pos.x;	// スコアの表示位置X
-	py = g_Pos.y;			// スコアの表示位置Y
-	pw = g_w * percent;				// スコアの表示幅
-	ph = g_h * percent;				// スコアの表示高さ
+		// スコアの位置やテクスチャー座標を反映
+		px = g_Pos.x;	// スコアの表示位置X
+		py = g_Pos.y + i * (g_h * 1.1f);			// スコアの表示位置Y
+		pw = g_w;				// スコアの表示幅
+		ph = g_h;				// スコアの表示高さ
 
-	tw = 1.0f;		// テクスチャの幅
-	th = 1.0f;		// テクスチャの高さ
-	tx = 0.0f;			// テクスチャの左上X座標
-	ty = 0.0f;			// テクスチャの左上Y座標
+		tw = 1.0f;		// テクスチャの幅
+		th = 1.0f;		// テクスチャの高さ
+		tx = 0.0f;			// テクスチャの左上X座標
+		ty = 0.0f;			// テクスチャの左上Y座標
 
-	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-		XMFLOAT4(0.0f, 0.67f, 0.0f, 1.0f));
+		// １枚のポリゴンの頂点とテクスチャ座標を設定
+		SetSpriteLTColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+			XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
-	// ポリゴン描画
-	GetDeviceContext()->Draw(4, 0);
+		// ポリゴン描画
+		GetDeviceContext()->Draw(4, 0);
+		if (g_MenuIndex == i)
+		{
+			// テクスチャ設定
+			GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[TEXTURE_MAX]);
+
+			// スコアの位置やテクスチャー座標を反映
+			px = g_Pos.x - TEXTURE_WIDTH_SELECT * 1.1f;	// スコアの表示位置X
+			py = g_Pos.y + i * (g_h * 1.1f);			// スコアの表示位置Y
+			pw = TEXTURE_WIDTH_SELECT;				// スコアの表示幅
+			ph = TEXTURE_HEIGHT_SELECT;				// スコアの表示高さ
+
+			tw = 1.0f;		// テクスチャの幅
+			th = 1.0f;		// テクスチャの高さ
+			tx = 0.0f;			// テクスチャの左上X座標
+			ty = 0.0f;			// テクスチャの左上Y座標
+
+			// １枚のポリゴンの頂点とテクスチャ座標を設定
+			SetSpriteLTColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+				XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+
+			// ポリゴン描画
+			GetDeviceContext()->Draw(4, 0);
+		}
+	}
+
 
 }
 

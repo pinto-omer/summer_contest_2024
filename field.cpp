@@ -36,7 +36,7 @@ static char* g_TexturName[TEXTURE_MAX] = {
 
 static BOOL	g_Load = FALSE;		// 初期化を行ったかのフラグ
 static FIELD	g_Field;
-static int fieldNum = 1;
+static int fieldNum = 0;
 
 static int field1[FIELD_TILE_H][FIELD_TILE_W] =
 {
@@ -101,7 +101,6 @@ HRESULT InitField(void)
 
 	g_Field.scrl = 0.0f;		// TEXスクロール
 	g_Field.scrl2 = 0.0f;		// TEXスクロール
-	
 	InitTile();
 	InitVariableTile();
 	g_Field.tile_w = GetTile()->w;

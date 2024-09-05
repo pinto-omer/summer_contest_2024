@@ -284,6 +284,10 @@ void UpdateEditor(void)
 				field->varTilePos[varTileIDX] = XMINT2(row, col);
 			}
 		}
+		else if (GetKeyboardTrigger(DIK_ESCAPE))
+		{
+			ToggleMenu();
+		}
 
 
 
