@@ -19,8 +19,10 @@
 #define TEXTURE_WIDTH_LOGO			(480)			// ロゴサイズ
 #define TEXTURE_HEIGHT_LOGO			(80)			// 
 
-#define ANIM_WAIT					(8)
+#define ANIM_WAIT					(4)
 #define TEXTURE_PATTERN_DIVIDE_X	(5)
+#define PLAYER_TEXTURE_WIDTH		(128)
+#define PLAYER_TEXTURE_HEIGHT		(128)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -134,7 +136,7 @@ void UpdateResult(void)
 {
 	if (GetGameOverStatus() == GAME_OVER && g_patternAnim < TEXTURE_PATTERN_DIVIDE_X - 1)
 	{
-		g_countAnim++;
+		g_countAnim+=0.33f;
 		if (g_countAnim >= ANIM_WAIT)
 		{
 			g_patternAnim++;
@@ -212,7 +214,25 @@ void DrawResult(void)
 	}
 	if (GetGameOverStatus() == GAME_OVER)
 	{
+		//バレットの位置やテクスチャー座標を反映
+		float px = g_Pos.x;		// バレットの表示位置X
+		float py = g_Pos.y * 2.0f;		// バレットの表示位置Y
+		float pw = PLAYER_TEXTURE_WIDTH;		// バレットの表示幅
+		float ph = PLAYER_TEXTURE_HEIGHT;		// バレットの表示高さ
 
+		float tw = 1.0f / TEXTURE_PATTERN_DIVIDE_X;	// テクスチャの幅
+		float th = 1.0f; 	// テクスチャの高さ
+		float tx =g_patternAnim * tw;	// テクスチャの左上X座標
+		float ty = 0.0f;	// テクスチャの左上Y座標
+	
+		// テクスチャ設定
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[DEAD]);
+
+		// １枚のポリゴンの頂点とテクスチャ座標を設定
+		SetSpriteLeftTop(g_VertexBuffer, px,py, pw, ph, tx, ty, tw, th);
+
+		// ポリゴン描画
+		GetDeviceContext()->Draw(4, 0);
 	}
 }
 
