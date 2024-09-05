@@ -9,7 +9,7 @@
 #include "camera.h"
 #include "debugproc.h"
 #include "input.h"
-
+#include "menu.h"
 #include "title.h"
 #include "bg.h"
 #include "player.h"
@@ -55,7 +55,7 @@ char	g_DebugStr[2048] = WINDOW_NAME;		// デバッグ文字表示用
 
 int	g_Mode = MODE_TITLE;					// 起動時の画面を設定
 
-BOOL g_LoadGame = FALSE;					// NewGame
+BOOL isMenu = FALSE;
 
 
 //=============================================================================
@@ -215,7 +215,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switch(wParam)
 		{
 		case VK_ESCAPE:
-			DestroyWindow(hWnd);
+			//DestroyWindow(hWnd);
 			break;
 		}
 		break;
@@ -462,6 +462,9 @@ void SetMode(int mode)
 
 	UninitEditor();
 
+	if (isMenu)
+		ToggleMenu();
+
 	g_Mode = mode;	// 次のモードをセットしている
 
 	switch (g_Mode)
@@ -469,6 +472,7 @@ void SetMode(int mode)
 	case MODE_TITLE:
 		// タイトル画面の初期化
 		InitTitle();
+		ToggleMenu();
 		//PlaySound(SOUND_LABEL_BGM_maou);
 		break;
 	case MODE_EDITOR:
@@ -488,12 +492,7 @@ void SetMode(int mode)
 	//	InitEffect();
 		InitOverlay();
 
-		// ロードゲームだったらすべての初期化が終わった後にセーブデータを読み込む
-		if (g_LoadGame == TRUE)
-		{
-			LoadData();
-			g_LoadGame = FALSE;		// ロードしたからフラグをClearする
-		}
+		
 
 		//PlaySound(SOUND_LABEL_BGM_bgm);
 		break;
@@ -525,12 +524,23 @@ int CheckGameClear(void)
 	return GetGameOverStatus();		// ゲーム継続
 }
 
+void ToggleMenu(void)
+{
+	if (isMenu)
+	{
+		UninitMenu();
+		isMenu = FALSE;
+	}
+	else
+	{
+		InitMenu();
+		isMenu = TRUE;
+	}
+}
+
 
 //=============================================================================
 // ニューゲームかロードゲームかをセットする
 //=============================================================================
-void SetLoadGame(BOOL flg)
-{
-	g_LoadGame = flg;
-}
+
 

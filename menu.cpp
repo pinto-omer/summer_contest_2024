@@ -5,17 +5,22 @@
 //
 //=============================================================================
 #include "main.h"
+#include "input.h"
 #include "renderer.h"
 #include "menu.h"
 #include "sprite.h"
 #include "player.h"
+#include "fade.h"
+#include "file.h"
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
-#define TEXTURE_WIDTH				(100)	// キャラサイズ
+#define TEXTURE_WIDTH				(250)	// キャラサイズ
 #define TEXTURE_HEIGHT				(50)	// 
 #define TEXTURE_MAX					(11)		// テクスチャの数
 
+#define TEXTURE_WIDTH_SELECT		(50)	// キャラサイズ
+#define TEXTURE_HEIGHT_SELECT		(50)	// 
 
 //*****************************************************************************
 // プロトタイプ宣言
@@ -29,27 +34,45 @@ static ID3D11Buffer* g_VertexBuffer = NULL;		// 頂点情報
 static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// テクスチャ情報
 
 static char* g_TexturName[] = {
-	"data/TEXTURE/back.png",
-	"data/TEXTURE/exit.png",
-	"data/TEXTURE/leveleditor.png",
-	"data/TEXTURE/load.png",
-	"data/TEXTURE/mainmenu.png",
-	"data/TEXTURE/plevel1.png",
-	"data/TEXTURE/plevel2.png",
-	"data/TEXTURE/plevel3.png",
-	"data/TEXTURE/resume.png",
-	"data/TEXTURE/save.png",
-	"data/TEXTURE/select.png",
-	"data/TEXTURE/start.png",
+	"data/TEXTURE/fade_black.png",
+	"data/TEXTURE/menu/back.png",
+	"data/TEXTURE/menu/exit.png",
+	"data/TEXTURE/menu/leveleditor.png",
+	"data/TEXTURE/menu/load.png",
+	"data/TEXTURE/menu/mainmenu.png",
+	"data/TEXTURE/menu/plevel1.png",
+	"data/TEXTURE/menu/plevel2.png",
+	"data/TEXTURE/menu/plevel3.png",
+	"data/TEXTURE/menu/resume.png",
+	"data/TEXTURE/menu/save.png",
+	"data/TEXTURE/menu/start.png",
 };
 
+static char g_SelectTextureName[] = "data/TEXTURE/select.png";
 
-static bool						g_Use;						// true:使っている  false:未使用
+
+enum {
+	BG,
+	BACK,
+	EXIT,
+	LEVEL_EDITOR,
+	LOAD,
+	MAINMENU,
+	PLEVEL1,
+	PLEVEL2,
+	PLEVEL3,
+	RESUME,
+	SAVE,
+	START,
+};
+static int						g_ModeMenus[MODE_MAX + 1][TEXTURE_MAX];
+static BOOL						isLevelSelect;						// true:使っている  false:未使用
 static float					g_w, g_h;					// 幅と高さ
 static XMFLOAT3					g_Pos;						// ポリゴンの座標
-static int						g_TexNo;					// テクスチャ番号
-
-static int						g_Menu;					// スコア
+static int						g_Menu;					// テクスチャ番号
+static int						g_MaxIndex;
+static int						g_MenuIndex;					//
+static BOOL						isSave;
 
 //=============================================================================
 // 初期化処理
@@ -69,6 +92,32 @@ HRESULT InitMenu(void)
 			&g_Texture[i],
 			NULL);
 	}
+	for (int i = 0; i < MODE_MAX+1; i++)
+	{
+		for (int j = 0; j < TEXTURE_MAX; j++)
+		{
+			g_ModeMenus[i][j] = -1;
+		}
+	}
+	g_ModeMenus[MODE_TITLE][0] = START;
+	g_ModeMenus[MODE_TITLE][1] = LEVEL_EDITOR;
+	g_ModeMenus[MODE_TITLE][2] = EXIT;
+
+	g_ModeMenus[MODE_GAME][0] = RESUME;
+	g_ModeMenus[MODE_GAME][1] = LOAD;
+	g_ModeMenus[MODE_GAME][2] = MAINMENU;
+
+	g_ModeMenus[MODE_EDITOR][0] = RESUME;
+	g_ModeMenus[MODE_EDITOR][1] = SAVE;
+	g_ModeMenus[MODE_EDITOR][2] = LOAD;
+	g_ModeMenus[MODE_EDITOR][3] = MAINMENU;
+
+	g_ModeMenus[MODE_MAX][0] = PLEVEL1;
+	g_ModeMenus[MODE_MAX][1] = PLEVEL2;
+	g_ModeMenus[MODE_MAX][2] = PLEVEL3;
+	g_ModeMenus[MODE_MAX][3] = BACK;
+
+
 
 
 	// 頂点バッファ生成
@@ -82,13 +131,13 @@ HRESULT InitMenu(void)
 
 
 	// プレイヤーの初期化
-	g_Use = true;
+	isLevelSelect = FALSE;
 	g_w = TEXTURE_WIDTH;
 	g_h = TEXTURE_HEIGHT;
-	g_Pos = { SCREEN_WIDTH - TEXTURE_WIDTH * 0.5f - 20.0f, TEXTURE_HEIGHT * 0.5f + 20.0f, 0.0f };
-	g_TexNo = 0;
-
-	g_Menu = 0;	// スコアの初期化
+	g_Pos = { SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.33f, 0.0f };
+	g_Menu = -1;
+	g_MaxIndex = -1;
+	g_MenuIndex = 0;
 
 	return S_OK;
 }
@@ -111,7 +160,7 @@ void UninitMenu(void)
 			g_Texture[i]->Release();
 			g_Texture[i] = NULL;
 		}
-	}
+	} 
 
 }
 
@@ -120,6 +169,91 @@ void UninitMenu(void)
 //=============================================================================
 void UpdateMenu(void)
 {
+
+	if (g_Menu == -1)
+		g_Menu = GetMode();
+	for (int i = 0; i < TEXTURE_MAX; i++)
+	{
+		if (g_ModeMenus[g_Menu][i] == -1) break;
+		g_MaxIndex++;
+	}
+
+	if (GetKeyboardTrigger(DIK_UP) || IsButtonTriggered(0, BUTTON_UP))
+	{
+		g_MenuIndex -= g_MenuIndex == 0 ? 0 : 1;
+	}
+	else if (GetKeyboardTrigger(DIK_DOWN) || IsButtonTriggered(0, BUTTON_DOWN))
+	{
+		g_MenuIndex += g_MenuIndex < g_MaxIndex - 1 ? 1 : 0;
+	}
+	else if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_DOWN))
+	{
+		switch (g_ModeMenus[g_Menu][g_MenuIndex])
+		{
+		case BACK:
+			g_Menu = -1;
+			g_MenuIndex = 0;
+			break;
+		case EXIT:
+			SetFade(FADE_OUT,MODE_MAX);
+			break;
+		case LEVEL_EDITOR:
+			SetFade(FADE_OUT, MODE_EDITOR);
+			break;
+		case LOAD:
+			g_Menu = MODE_MAX;
+			g_MenuIndex = 0;
+			isSave = FALSE;
+			break;
+		case MAINMENU:
+			SetFade(FADE_OUT, MODE_TITLE);
+			break;
+		case PLEVEL1:
+			if (isSave)
+			{
+				SaveField(1);
+			}
+			else
+			{
+				LoadField(1);
+			}
+			ToggleMenu();
+			break;
+		case PLEVEL2:
+			if (isSave)
+			{
+				SaveField(2);
+			}
+			else
+			{
+				LoadField(2);
+			}
+			ToggleMenu();
+			break;
+		case PLEVEL3:
+			if (isSave)
+			{
+				SaveField(3);
+			}
+			else
+			{
+				LoadField(3);
+			}
+			ToggleMenu();
+			break;
+		case RESUME:
+			ToggleMenu();
+			break;
+		case SAVE:
+			g_Menu = MODE_MAX;
+			g_MenuIndex = 0;
+			isSave = FALSE;
+			break;
+		case START:
+			SetFade(FADE_OUT, MODE_GAME);
+			break;
+		}
+	}
 
 
 #ifdef _DEBUG	// デバッグ情報を表示する
@@ -153,13 +287,13 @@ void DrawMenu(void)
 	SetMaterial(material);
 
 	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_TexNo]);
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[BG]);
 
 	// スコアの位置やテクスチャー座標を反映
-	float px = g_Pos.x;	// スコアの表示位置X
-	float py = g_Pos.y;			// スコアの表示位置Y
-	float pw = g_w;				// スコアの表示幅
-	float ph = g_h;				// スコアの表示高さ
+	float px = 0;	// スコアの表示位置X
+	float py = 0;			// スコアの表示位置Y
+	float pw = SCREEN_WIDTH;				// スコアの表示幅
+	float ph = SCREEN_HEIGHT;				// スコアの表示高さ
 
 	float tw = 1.0f;		// テクスチャの幅
 	float th = 1.0f;		// テクスチャの高さ
@@ -167,14 +301,14 @@ void DrawMenu(void)
 	float ty = 0.0f;			// テクスチャの左上Y座標
 
 	// １枚のポリゴンの頂点とテクスチャ座標を設定
-	SetSpriteColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-		XMFLOAT4(0.67f, 0.0f, 0.0f, 1.0f));
+	SetSpriteLTColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 0.25f));
 
 	// ポリゴン描画
 	GetDeviceContext()->Draw(4, 0);
 
 	// テクスチャ設定
-	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_TexNo]);
+	GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_Menu]);
 
 	float percent = GetPlayer()->hp / PLAYER_MAX_HP;
 	// スコアの位置やテクスチャー座標を反映

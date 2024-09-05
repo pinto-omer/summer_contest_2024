@@ -91,5 +91,5 @@ int GetMode(void);
 
 int CheckGameClear(void);
 
-void SetLoadGame(BOOL flg);
+void ToggleMenu(void);
 
