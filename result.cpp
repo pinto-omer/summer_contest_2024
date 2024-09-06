@@ -145,7 +145,7 @@ void UpdateResult(void)
 	}
 	else
 	{
-		if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_START) || IsButtonTriggered(0, BUTTON_A))
+		if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(0, BUTTON_START) || IsButtonTriggered(0, BUTTON_A))
 		{// Enter押したら、ステージを切り替える
 			SetFade(FADE_OUT, MODE_TITLE);
 		}
