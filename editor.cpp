@@ -29,6 +29,7 @@
 #define EDITOR_DISP_X				(SCREEN_WIDTH / 2)
 # define EDITOR_DISP_Y				(SCREEN_HEIGHT / 2)
 
+#define PAD_MOVE_DELAY				(5)
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -53,7 +54,8 @@ static BOOL		g_Load = FALSE;				// 初期化を行ったかのフラグ
 static BOOL		isVarTile;
 static EDITOR	g_Editor;		// プレイヤー構造体
 
-
+static int		g_PadMoveY;
+static int		g_PadMoveX;
 
 //=============================================================================
 // 初期化処理
@@ -100,7 +102,8 @@ HRESULT InitEditor(void)
 
 	isVarTile = FALSE;
 
-
+	g_PadMoveY = 0;
+	g_PadMoveX = 0;
 
 	g_Load = TRUE;
 	return S_OK;
@@ -154,56 +157,97 @@ void UpdateEditor(void)
 
 	// キー入力で移動 
 	{
-		if (GetKeyboardRepeat(DIK_DOWN) || IsButtonPressed(0, BUTTON_DOWN))
+		if (GetKeyboardRepeat(DIK_S))
 		{
 
 			g_Editor.pos.y += g_Editor.move.y;
 		}
-		else if (GetKeyboardRepeat(DIK_UP) || IsButtonPressed(0, BUTTON_UP))
+		else if (GetKeyboardRepeat(DIK_W))
 		{
 			g_Editor.pos.y -= g_Editor.move.y;
 		}
+		else if (IsButtonPressed(0, BUTTON_DOWN) && !g_PadMoveY)
+		{
+			g_Editor.pos.y += g_Editor.move.y;
+			g_PadMoveY = PAD_MOVE_DELAY;
+		}
+		else if (IsButtonPressed(0, BUTTON_UP) && !g_PadMoveY)
+		{
+			g_Editor.pos.y -= g_Editor.move.y;
+			g_PadMoveY = PAD_MOVE_DELAY;
+		}
+		else if (g_PadMoveY)
+			g_PadMoveY--;
 
-		if (GetKeyboardRepeat(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
+		if (GetKeyboardRepeat(DIK_D))
 		{
 			g_Editor.pos.x += g_Editor.move.x;
 		}
-		else if (GetKeyboardRepeat(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
+		else if (GetKeyboardRepeat(DIK_A))
 		{
 			g_Editor.pos.x -= g_Editor.move.x;
 		}
+		else if (IsButtonPressed(0, BUTTON_RIGHT) && !g_PadMoveX)
+		{
+			g_Editor.pos.x += g_Editor.move.x;
+			g_PadMoveX = PAD_MOVE_DELAY;
+		}
+		else if (IsButtonPressed(0, BUTTON_LEFT) && !g_PadMoveX)
+		{
+			g_Editor.pos.x -= g_Editor.move.x;
+			g_PadMoveX = PAD_MOVE_DELAY;
+		}
+		else if (g_PadMoveX)
+			g_PadMoveX--;
 
 		if (isVarTile)
 		{
 			VARTILE* vartile = &GetVarTile()[MAX_VAR_TILES];
-			if (GetKeyboardTrigger(DIK_W))
+			if (GetKeyboardTrigger(DIK_UP))
 			{
 				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 0.0f;
 				}
 			}
-			else if (GetKeyboardTrigger(DIK_S))
+			else if (GetKeyboardTrigger(DIK_DOWN))
 			{
 				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 3.14f;
 				}
 			}
-			else if (GetKeyboardTrigger(DIK_A))
+			else if (GetKeyboardTrigger(DIK_LEFT))
 			{
 				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 3.14f * 1.5f;
 				}
 			}
-			else if (GetKeyboardTrigger(DIK_D))
+			else if (GetKeyboardTrigger(DIK_RIGHT))
 			{
 				if (vartile->type == V_DIRECTIONAL_TRAP)
 				{
 					vartile->rot.z = 3.14f * 0.5f;
 				}
 			}
+			else if (IsButtonTriggered(0,BUTTON_L2))
+			{
+				if (vartile->type == V_DIRECTIONAL_TRAP)
+				{
+					if (vartile->rot.z == 0.0f)
+						vartile->rot.z = 4.71f;
+					else
+						vartile->rot.z -= 1.57f;
+				}
+			}
+			else if (IsButtonTriggered(0, BUTTON_R2))
+			{
+				vartile->rot.z += 1.57f;
+				if (vartile->rot.z == 6.28f)
+					vartile->rot.z = 0.0f;
+			}
+			
 		}
 
 		//field edit debug
@@ -241,7 +285,7 @@ void UpdateEditor(void)
 			return;
 		}
 #endif
-		if (GetKeyboardRepeat(DIK_Q))
+		if (GetKeyboardRepeat(DIK_Q) || IsButtonTriggered(0,BUTTON_L))
 		{
 			if (--g_Editor.texNo < 0)
 				g_Editor.texNo = TILE_MAX - 1;
@@ -254,7 +298,7 @@ void UpdateEditor(void)
 				ResetEditorVarTile(g_Editor.texNo);
 			}
 		}
-		else if (GetKeyboardRepeat(DIK_E))
+		else if (GetKeyboardRepeat(DIK_E) || IsButtonTriggered(0, BUTTON_R))
 		{
 			g_Editor.texNo++;
 			if (g_Editor.texNo == TILE_FROZEN_ARROW)
@@ -268,7 +312,7 @@ void UpdateEditor(void)
 				ResetEditorVarTile(g_Editor.texNo);
 			}
 		}
-		else if (GetKeyboardTrigger(DIK_SPACE))
+		else if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(0, BUTTON_A))
 		{
 			FIELD* field = GetField();
 			int row, col;
@@ -285,7 +329,7 @@ void UpdateEditor(void)
 				field->varTilePos[varTileIDX] = XMINT2(row, col);
 			}
 		}
-		else if (GetKeyboardTrigger(DIK_ESCAPE))
+		else if (GetKeyboardTrigger(DIK_ESCAPE) || IsButtonTriggered(0, BUTTON_START))
 		{
 			ToggleMenu();
 		}

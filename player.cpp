@@ -344,7 +344,7 @@ void UpdatePlayer(void)
 						return;
 					}
 				}
-				else if (GetKeyboardTrigger(DIK_ESCAPE))
+				else if (GetKeyboardTrigger(DIK_ESCAPE) || IsButtonTriggered(0,BUTTON_START))
 				{
 					ToggleMenu();
 				}
@@ -474,7 +474,7 @@ void UpdatePlayer(void)
 
 				}
 				// ジャンプボタン押した？
-				else if ((g_Player[i].jump == FALSE) && (GetKeyboardTrigger(DIK_SPACE)))
+				else if (g_Player[i].jump == FALSE && (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(0,BUTTON_A)))
 				{
 					g_Player[i].jump = TRUE;
 					g_Player[i].jumpCnt = 1;
@@ -483,7 +483,7 @@ void UpdatePlayer(void)
 
 				if (!g_Player[i].moving && !g_Player[i].jump && !g_Player[i].freeze)
 				{
-					if (GetKeyboardTrigger(DIK_X))
+					if (GetKeyboardTrigger(DIK_X) || IsButtonTriggered(0,BUTTON_X))
 					{
 						g_Player[i].freeze = TRUE;
 						g_Player[i].freezePos = g_Player[i].pos;

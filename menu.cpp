@@ -195,7 +195,7 @@ void UpdateMenu(void)
 	{
 		g_MenuIndex += g_MenuIndex < g_MaxIndex ? 1 : 0;
 	}
-	else if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_DOWN))
+	else if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
 	{
 		switch (g_ModeMenus[g_Menu][g_MenuIndex])
 		{
