@@ -131,7 +131,7 @@ void UpdateTutorial(void)
 
 	if (GetKeyboardTrigger(DIK_SPACE) ||
 		IsButtonTriggered(0, BUTTON_START) ||
-		IsButtonTriggered(0, BUTTON_B))
+		IsButtonTriggered(0, BUTTON_A))
 	{//ステージを切り替える
 			SetFade(FADE_OUT, MODE_TUTORIAL);
 	}
