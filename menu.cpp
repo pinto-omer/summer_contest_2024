@@ -187,15 +187,15 @@ void UpdateMenu(void)
 		g_MaxIndex++;
 	}
 
-	if (GetKeyboardTrigger(DIK_UP) || IsButtonTriggered(0, BUTTON_UP))
+	if (GetKeyboardTrigger(DIK_W) || IsButtonTriggered(0, BUTTON_UP))
 	{
 		g_MenuIndex -= g_MenuIndex == 0 ? 0 : 1;
 	}
-	else if (GetKeyboardTrigger(DIK_DOWN) || IsButtonTriggered(0, BUTTON_DOWN))
+	else if (GetKeyboardTrigger(DIK_S) || IsButtonTriggered(0, BUTTON_DOWN))
 	{
 		g_MenuIndex += g_MenuIndex < g_MaxIndex ? 1 : 0;
 	}
-	else if (GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_A))
+	else if (GetKeyboardTrigger(DIK_RETURN) || GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(0, BUTTON_A))
 	{
 		switch (g_ModeMenus[g_Menu][g_MenuIndex])
 		{

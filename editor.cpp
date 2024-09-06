@@ -14,6 +14,7 @@
 #include "file.h"
 #include "tile.h"
 #include "field.h"
+#include "sound.h"
 //*****************************************************************************
 // ƒ}ƒNƒ’è‹`
 //*****************************************************************************
@@ -328,6 +329,7 @@ void UpdateEditor(void)
 				vartiles[varTileIDX] = vartiles[MAX_VAR_TILES];
 				field->varTilePos[varTileIDX] = XMINT2(row, col);
 			}
+			PlaySound(SOUND_LABEL_SE_PLACE);
 		}
 		else if (GetKeyboardTrigger(DIK_ESCAPE) || IsButtonTriggered(0, BUTTON_START))
 		{

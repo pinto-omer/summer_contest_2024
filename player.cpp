@@ -14,6 +14,7 @@
 #include "file.h"
 #include "tile.h"
 #include "field.h"
+#include "sound.h"
 //*****************************************************************************
 // ƒ}ƒNƒ’è‹`
 //*****************************************************************************
@@ -278,7 +279,7 @@ void UpdatePlayer(void)
 						g_Player[i].moving = TRUE;
 					}*/
 
-				if (GetKeyboardPress(DIK_RIGHT) || IsButtonPressed(0, BUTTON_RIGHT))
+				if (GetKeyboardPress(DIK_D) || IsButtonPressed(0, BUTTON_RIGHT))
 				{
 					BOOL collided = FALSE;
 					BOOL goal = FALSE;
@@ -311,7 +312,7 @@ void UpdatePlayer(void)
 						return;
 					}
 				}
-				else if (GetKeyboardPress(DIK_LEFT) || IsButtonPressed(0, BUTTON_LEFT))
+				else if (GetKeyboardPress(DIK_A) || IsButtonPressed(0, BUTTON_LEFT))
 				{
 					BOOL collided = FALSE;
 					BOOL goal = FALSE;
@@ -483,11 +484,12 @@ void UpdatePlayer(void)
 
 				if (!g_Player[i].moving && !g_Player[i].jump && !g_Player[i].freeze)
 				{
-					if (GetKeyboardTrigger(DIK_X) || IsButtonTriggered(0,BUTTON_X))
+					if (GetKeyboardTrigger(DIK_F) || IsButtonTriggered(0,BUTTON_X))
 					{
 						g_Player[i].freeze = TRUE;
 						g_Player[i].freezePos = g_Player[i].pos;
 						g_Player[i].freezeRadius = 1.0f / FREEZE_FRAME_COUNT;
+						PlaySound(SOUND_LABEL_SE_FREEZE);
 					}
 				}
 				else if (g_Player[i].freeze)
@@ -689,6 +691,8 @@ void DamagePlayer(PLAYER* player)
 	if (player->hp < 0.0f)
 		player->hp = 0.0f;
 	player->framesSinceHit = 0;
+	PlaySound(SOUND_LABEL_SE_HIT);
+
 }
 
 

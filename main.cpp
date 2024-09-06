@@ -492,7 +492,7 @@ void SetMode(int mode)
 		// タイトル画面の初期化
 		InitTitle();
 		ToggleMenu();
-		//PlaySound(SOUND_LABEL_BGM_maou);
+		PlaySound(SOUND_LABEL_BGM_TITLE);
 		break;
 	case MODE_EDITOR:
 		InitBG();
@@ -500,6 +500,7 @@ void SetMode(int mode)
 		//	InitEffect();
 		InitPlayer();
 		InitEditor();
+		PlaySound(SOUND_LABEL_BGM_GAME);
 		break;
 	case MODE_GAME:
 		// ゲーム画面の初期化
@@ -513,7 +514,7 @@ void SetMode(int mode)
 
 
 
-		//PlaySound(SOUND_LABEL_BGM_bgm);
+		PlaySound(SOUND_LABEL_BGM_GAME);
 		break;
 
 	case MODE_RESULT:
