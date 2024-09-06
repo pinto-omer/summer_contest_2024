@@ -21,7 +21,7 @@
 #include "fade.h"
 #include "field.h"
 #include "file.h"
-
+#include "tutorial.h"
 #include "effect.h"
 #include "editor.h"
 //*****************************************************************************
@@ -310,6 +310,9 @@ void Update(void)
 			else
 				UpdateTitle();
 			break;
+		case MODE_TUTORIAL:
+			UpdateTutorial();
+			break;
 		case MODE_EDITOR:
 			if (!isMenu)
 			{
@@ -382,6 +385,9 @@ void Draw(void)
 	case MODE_TITLE:		// ƒ^ƒCƒgƒ‹‰æ–Ê‚Ì•`‰æ
 		DrawTitle();
 		DrawMenu();
+		break;
+	case MODE_TUTORIAL:
+		DrawTutorial();
 		break;
 	case MODE_EDITOR:
 		DrawBG();
@@ -481,6 +487,8 @@ void SetMode(int mode)
 
 	UninitEditor();
 
+	UninitTutorial();
+
 	if (isMenu)
 		ToggleMenu();
 
@@ -493,6 +501,9 @@ void SetMode(int mode)
 		InitTitle();
 		ToggleMenu();
 		PlaySound(SOUND_LABEL_BGM_TITLE);
+		break;
+	case MODE_TUTORIAL:
+		InitTutorial();
 		break;
 	case MODE_EDITOR:
 		InitBG();

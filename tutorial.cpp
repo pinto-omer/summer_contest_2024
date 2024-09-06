@@ -1,10 +1,10 @@
 //=============================================================================
 //
-// ƒ^ƒCƒgƒ‹‰æ–Êˆ— [title.cpp]
+// ƒ^ƒCƒgƒ‹‰æ–Êˆ— [tutorial.cpp]
 // Author : GP11B132 31 PINTO OMER
 //
 //=============================================================================
-#include "title.h"
+#include "tutorial.h"
 #include "input.h"
 #include "fade.h"
 
@@ -13,13 +13,14 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(SCREEN_WIDTH)	// ”wŒiƒTƒCƒY
 #define TEXTURE_HEIGHT				(SCREEN_HEIGHT)	// 
-#define TEXTURE_MAX					(3)				// ƒeƒNƒXƒ`ƒƒ‚Ì”
+#define TEXTURE_MAX					(7)				// ƒeƒNƒXƒ`ƒƒ‚Ì”
 
-#define TEXTURE_WIDTH_LOGO			(433)			// ƒƒSƒTƒCƒY
-#define TEXTURE_HEIGHT_LOGO			(199)			// 
+#define TEXTURE_WIDTH_LOGO			(400)			// ƒƒSƒTƒCƒY
+#define TEXTURE_HEIGHT_LOGO			(400)			// 
 
-#define TEXTURE_WIDTH_CREDIT		(250)
-#define TEXTURE_HEIGHT_CREDIT		(25)
+#define TEXTURE_WIDTH_TITLE		(250)
+#define TEXTURE_HEIGHT_TITLE	(50)
+
 //*****************************************************************************
 // ƒvƒƒgƒ^ƒCƒvéŒ¾
 //*****************************************************************************
@@ -33,8 +34,13 @@ static ID3D11ShaderResourceView* g_Texture[TEXTURE_MAX] = { NULL };	// ƒeƒNƒXƒ`ƒ
 
 static char* g_TexturName[TEXTURE_MAX] = {
 	"data/TEXTURE/title_bg.png",
-	"data/TEXTURE/title.png",
-	"data/TEXTURE/menu/credit.png",
+	"data/TEXTURE/menu/game.png",
+	"data/TEXTURE/controller_game.png",
+	"data/TEXTURE/keyboard_game.png",
+	"data/TEXTURE/menu/leveleditor.png",
+	"data/TEXTURE/controller_editor.png",
+	"data/TEXTURE/keyboard_editor.png",
+
 };
 
 
@@ -50,7 +56,7 @@ static BOOL						g_Load = FALSE;
 //=============================================================================
 // ‰Šú‰»ˆ—
 //=============================================================================
-HRESULT InitTitle(void)
+HRESULT InitTutorial(void)
 {
 	ID3D11Device* pDevice = GetDevice();
 
@@ -81,10 +87,11 @@ HRESULT InitTitle(void)
 	g_Use = TRUE;
 	g_w = TEXTURE_WIDTH;
 	g_h = TEXTURE_HEIGHT;
-	g_Pos = XMFLOAT3(g_w / 2.0f, g_h *0.33f, 0.0f);
-
-	g_TexNo = 0;
-
+	g_Pos = XMFLOAT3(g_w * 0.25f, g_h * 0.5f, 0.0f);
+	if (g_TexNo == 0 || g_TexNo == TEXTURE_MAX)
+		g_TexNo = 1;
+	else
+		g_TexNo += 3;
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -92,7 +99,7 @@ HRESULT InitTitle(void)
 //=============================================================================
 // I—¹ˆ—
 //=============================================================================
-void UninitTitle(void)
+void UninitTutorial(void)
 {
 	if (g_Load == FALSE) return;
 
@@ -117,16 +124,19 @@ void UninitTitle(void)
 //=============================================================================
 // XVˆ—
 //=============================================================================
-void UpdateTitle(void)
+void UpdateTutorial(void)
 {
+	if (g_TexNo == TEXTURE_MAX)
+		SetFade(FADE_OUT, MODE_TITLE);
 
-	if (GetKeyboardTrigger(DIK_RETURN) ||
+	if (GetKeyboardTrigger(DIK_SPACE) ||
 		IsButtonTriggered(0, BUTTON_START) ||
 		IsButtonTriggered(0, BUTTON_B))
 	{//ƒXƒe[ƒW‚ðØ‚è‘Ö‚¦‚é
-		SetFade(FADE_OUT, MODE_GAME);
+			SetFade(FADE_OUT, MODE_TUTORIAL);
 	}
-	
+
+
 
 
 #ifdef _DEBUG	// ƒfƒoƒbƒOî•ñ‚ð•\Ž¦‚·‚é
@@ -139,8 +149,9 @@ void UpdateTitle(void)
 //=============================================================================
 // •`‰æˆ—
 //=============================================================================
-void DrawTitle(void)
+void DrawTutorial(void)
 {
+	if (g_TexNo == TEXTURE_MAX) return;
 	// ’¸“_ƒoƒbƒtƒ@Ý’è
 	UINT stride = sizeof(VERTEX_3D);
 	UINT offset = 0;
@@ -173,7 +184,19 @@ void DrawTitle(void)
 	// ƒ^ƒCƒgƒ‹‚Ì”wŒi‚ð•`‰æ
 	{
 		// ƒeƒNƒXƒ`ƒƒÝ’è
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[1]);
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_TexNo]);
+
+		// ‚P–‡‚Ìƒ|ƒŠƒSƒ“‚Ì’¸“_‚ÆƒeƒNƒXƒ`ƒƒÀ•W‚ðÝ’è
+		SetSprite(g_VertexBuffer, g_Pos.x * 2.0f, g_Pos.y * 0.25f, TEXTURE_WIDTH_TITLE, TEXTURE_HEIGHT_TITLE, 0.0f, 0.0f, 1.0f, 1.0f);
+
+		// ƒ|ƒŠƒSƒ“•`‰æ
+		GetDeviceContext()->Draw(4, 0);
+	}
+
+	// ƒ^ƒCƒgƒ‹‚Ì”wŒi‚ð•`‰æ
+	{
+		// ƒeƒNƒXƒ`ƒƒÝ’è
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_TexNo+1]);
 
 		// ‚P–‡‚Ìƒ|ƒŠƒSƒ“‚Ì’¸“_‚ÆƒeƒNƒXƒ`ƒƒÀ•W‚ðÝ’è
 		SetSprite(g_VertexBuffer, g_Pos.x, g_Pos.y, TEXTURE_WIDTH_LOGO, TEXTURE_HEIGHT_LOGO, 0.0f, 0.0f, 1.0f, 1.0f);
@@ -185,14 +208,10 @@ void DrawTitle(void)
 	// ƒ^ƒCƒgƒ‹‚Ì”wŒi‚ð•`‰æ
 	{
 		// ƒeƒNƒXƒ`ƒƒÝ’è
-		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[2]);
+		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[g_TexNo+2]);
 
 		// ‚P–‡‚Ìƒ|ƒŠƒSƒ“‚Ì’¸“_‚ÆƒeƒNƒXƒ`ƒƒÀ•W‚ðÝ’è
-		SetSprite(g_VertexBuffer,
-			TEXTURE_WIDTH - 20 - TEXTURE_WIDTH_CREDIT / 2,
-			TEXTURE_HEIGHT - 20 - TEXTURE_HEIGHT_CREDIT / 2,
-			TEXTURE_WIDTH_CREDIT, TEXTURE_HEIGHT_CREDIT,
-			0.0f, 0.0f, 1.0f, 1.0f);
+		SetSprite(g_VertexBuffer, g_Pos.x*3.0f, g_Pos.y, TEXTURE_WIDTH_LOGO, TEXTURE_HEIGHT_LOGO, 0.0f, 0.0f, 1.0f, 1.0f);
 
 		// ƒ|ƒŠƒSƒ“•`‰æ
 		GetDeviceContext()->Draw(4, 0);

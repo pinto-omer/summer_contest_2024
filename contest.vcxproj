@@ -158,6 +158,7 @@
     <ClInclude Include="sprite.h" />
     <ClInclude Include="tile.h" />
     <ClInclude Include="title.h" />
+    <ClInclude Include="tutorial.h" />
     <ClInclude Include="variabletile.h" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +185,7 @@
     <ClCompile Include="sprite.cpp" />
     <ClCompile Include="tile.cpp" />
     <ClCompile Include="title.cpp" />
+    <ClCompile Include="tutorial.cpp" />
     <ClCompile Include="variabletile.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

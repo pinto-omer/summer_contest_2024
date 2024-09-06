@@ -17,7 +17,7 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(250)	// キャラサイズ
 #define TEXTURE_HEIGHT				(50)	// 
-#define TEXTURE_MAX					(12)		// テクスチャの数
+#define TEXTURE_MAX					(13)		// テクスチャの数
 
 #define TEXTURE_WIDTH_SELECT		(50)	// キャラサイズ
 #define TEXTURE_HEIGHT_SELECT		(50)	// 
@@ -46,6 +46,7 @@ static char* g_TexturName[] = {
 	"data/TEXTURE/menu/resume.png",
 	"data/TEXTURE/menu/save.png",
 	"data/TEXTURE/menu/start.png",
+	"data/TEXTURE/menu/tutorial.png",
 };
 
 static char g_SelectTextureName[] = "data/TEXTURE/menu/select.png";
@@ -64,6 +65,7 @@ enum {
 	RESUME,
 	SAVE,
 	START,
+	TUTORIAL,
 };
 static int						g_ModeMenus[MODE_MAX + 1][TEXTURE_MAX];
 static BOOL						isLevelSelect;						// true:使っている  false:未使用
@@ -109,7 +111,8 @@ HRESULT InitMenu(void)
 	}
 	g_ModeMenus[MODE_TITLE][0] = START;
 	g_ModeMenus[MODE_TITLE][1] = LEVEL_EDITOR;
-	g_ModeMenus[MODE_TITLE][2] = EXIT;
+	g_ModeMenus[MODE_TITLE][2] = TUTORIAL;
+	g_ModeMenus[MODE_TITLE][3] = EXIT;
 
 	g_ModeMenus[MODE_GAME][0] = RESUME;
 	g_ModeMenus[MODE_GAME][1] = LOAD;
@@ -269,6 +272,9 @@ void UpdateMenu(void)
 		case START:
 			SetField(0);
 			SetFade(FADE_OUT, MODE_GAME);
+			break;
+		case TUTORIAL:
+			SetFade(FADE_OUT, MODE_TUTORIAL);
 			break;
 		}
 	}
