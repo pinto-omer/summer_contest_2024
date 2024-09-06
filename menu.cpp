@@ -225,14 +225,10 @@ void UpdateMenu(void)
 			}
 			else
 			{
-				if (GetMode() == MODE_GAME)
-				{
-					SetFade(FADE_OUT, MODE_GAME);
-					SetField(1);
-					return;
-				}
-				else
-					LoadField(1);
+
+				SetField(1);
+				SetFade(FADE_OUT, GetMode());
+				return;
 			}
 			ToggleMenu();
 			break;
@@ -243,14 +239,9 @@ void UpdateMenu(void)
 			}
 			else
 			{
-				if (GetMode() == MODE_GAME)
-				{
-					SetFade(FADE_OUT, MODE_GAME);
-					SetField(2);
-					return;
-				}
-				else
-					LoadField(2);
+				SetField(2);
+				SetFade(FADE_OUT, GetMode());
+				return;
 			}
 			ToggleMenu();
 			break;
@@ -261,14 +252,9 @@ void UpdateMenu(void)
 			}
 			else
 			{
-				if (GetMode() == MODE_GAME)
-				{
-					SetFade(FADE_OUT, MODE_GAME);
-					SetField(3);
-					return;
-				}
-				else
-					LoadField(3);
+				SetField(3);
+				SetFade(FADE_OUT, GetMode());
+				return;
 			}
 			ToggleMenu();
 			break;

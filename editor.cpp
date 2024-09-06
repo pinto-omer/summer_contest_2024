@@ -207,6 +207,7 @@ void UpdateEditor(void)
 		}
 
 		//field edit debug
+#ifdef _DEBUG
 		if (GetKeyboardPress(DIK_F2))
 		{
 			if (GetKeyboardTrigger(DIK_1))
@@ -239,7 +240,7 @@ void UpdateEditor(void)
 			SetMode(MODE_GAME);
 			return;
 		}
-
+#endif
 		if (GetKeyboardRepeat(DIK_Q))
 		{
 			if (--g_Editor.texNo < 0)

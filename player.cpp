@@ -348,6 +348,7 @@ void UpdatePlayer(void)
 				{
 					ToggleMenu();
 				}
+#ifdef _DEBUG
 				//field edit debug
 				if (GetKeyboardTrigger(DIK_F5))
 				{
@@ -374,7 +375,7 @@ void UpdatePlayer(void)
 						return;
 					}
 				}
-
+#endif
 				if (GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == AIR &&
 					g_Player[i].jump == FALSE)
 				{
@@ -535,15 +536,6 @@ void UpdatePlayer(void)
 			}
 		}
 	}
-
-
-
-
-#ifdef _DEBUG	// デバッグ情報を表示する
-
-
-#endif
-
 }
 
 //=============================================================================
