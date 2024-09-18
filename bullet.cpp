@@ -29,7 +29,8 @@
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
-
+void AddFrozen(BULLET* bullet);
+void DelFrozen(BULLET* bullet);
 
 //*****************************************************************************
 // グローバル変数
@@ -43,8 +44,8 @@ static char* g_TexturName[] = {
 
 static BOOL		g_Load = FALSE;			// 初期化を行ったかのフラグ
 static BULLET	g_Bullet[BULLET_MAX];	// バレット構造体
-
-
+static BULLET* g_Frozen[BULLET_MAX];
+static int		g_FrozenCount;
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -91,6 +92,7 @@ HRESULT InitBullet(void)
 		g_Bullet[i].freezeRemaining = 0;
 		g_Bullet[i].move = XMFLOAT3(BULLET_SPEED, BULLET_SPEED, 0.0f);	// 移動量を初期化
 	}
+	g_FrozenCount = 0;
 
 	g_Load = TRUE;
 	return S_OK;
@@ -202,7 +204,7 @@ void UpdateBullet(void)
 							continue;
 						}
 						TILE tile = GetTile()[field->field[y][x]];
-						if ((tile.type != AIR&&tile.type !=GOAL) &&
+						if ((tile.type != AIR && tile.type != GOAL) &&
 							CollisionBB(g_Bullet[i].pos, g_Bullet[i].w, g_Bullet[i].h,
 								XMFLOAT3(x * TILE_WIDTH + tile.w / 2.0f, y * TILE_HEIGHT + tile.h / 2.0f, 0.0f), tile.w, tile.h) == TRUE)
 						{
@@ -219,7 +221,8 @@ void UpdateBullet(void)
 						{
 							g_Bullet[i].frozen = TRUE;
 							g_Bullet[i].freezeRemaining = FREEZE_DURATION;
-							float y1, y2, x1, x2;
+							AddFrozen(&g_Bullet[i]);
+							/*float y1, y2, x1, x2;
 							y1 = g_Bullet[i].pos.y + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
 							y2 = g_Bullet[i].pos.y - 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
 							x1 = g_Bullet[i].pos.x + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].w : g_Bullet[i].h);
@@ -227,7 +230,7 @@ void UpdateBullet(void)
 							if (GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] == TILE_EMPTY)
 								GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] = TILE_FROZEN_ARROW;
 							if (GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] == TILE_EMPTY)
-								GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] = TILE_FROZEN_ARROW;
+								GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] = TILE_FROZEN_ARROW;*/
 							continue;
 						}
 						float tipAdjust = (g_Bullet[i].h - TIP_SIZE) * 0.5f;
@@ -263,7 +266,8 @@ void UpdateBullet(void)
 			else if (--g_Bullet[i].freezeRemaining == 0)
 			{
 				g_Bullet[i].frozen = FALSE;
-				float y1, y2, x1, x2;
+				DelFrozen(&g_Bullet[i]);
+				/*float y1, y2, x1, x2;
 				y1 = g_Bullet[i].pos.y + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
 				y2 = g_Bullet[i].pos.y - 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
 				x1 = g_Bullet[i].pos.x + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].w : g_Bullet[i].h);
@@ -271,7 +275,7 @@ void UpdateBullet(void)
 				if (GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] == TILE_FROZEN_ARROW)
 					GetField()->field[(int)(y1 / TILE_HEIGHT)][(int)(x1 / TILE_WIDTH)] = TILE_EMPTY;
 				if (GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] == TILE_FROZEN_ARROW)
-					GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] = TILE_EMPTY;
+					GetField()->field[(int)(y2 / TILE_HEIGHT)][(int)(x2 / TILE_WIDTH)] = TILE_EMPTY;*/
 			}
 
 			bulletCount++;
@@ -392,3 +396,33 @@ BULLET* SetBullet(XMFLOAT3 pos)
 	return NULL;
 }
 
+BULLET** GetFrozen(void)
+{
+	return g_Frozen;
+}
+
+int GetFrozenCount(void)
+{
+	return g_FrozenCount;
+}
+
+void AddFrozen(BULLET* bullet)
+{
+	g_Frozen[g_FrozenCount++] = bullet;
+}
+
+void DelFrozen(BULLET* bullet)
+{
+	BOOL removed = FALSE;
+	for (int i = 0; i < g_FrozenCount; i++)
+	{
+		if (!removed && g_Frozen[i] == bullet)
+		{
+			g_Frozen[i] = NULL;
+			removed = TRUE;
+		}
+		if (removed && i < BULLET_MAX)
+			g_Frozen[i] = g_Frozen[i + 1];
+	}
+	g_FrozenCount--;
+}

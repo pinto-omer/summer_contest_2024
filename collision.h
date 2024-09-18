@@ -21,6 +21,7 @@
 // プロトタイプ宣言
 //*****************************************************************************
 BOOL CollisionBB(XMFLOAT3 mpos, float mw, float mh, XMFLOAT3 ypos, float yw, float yh);
+BOOL CollisionBBRight(XMFLOAT3 mpos, float mw, float mh, XMFLOAT3 ypos, float yw, float yh, float mrot, float yrot);
 BOOL CollisionBC(XMFLOAT3 pos1, XMFLOAT3 pos2, float r1, float r2);
 
 

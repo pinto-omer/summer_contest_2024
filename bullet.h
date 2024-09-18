@@ -44,5 +44,7 @@ void DrawBullet(void);
 
 BULLET* GetBullet(void);
 BULLET* SetBullet(XMFLOAT3 pos);
+BULLET** GetFrozen(void);
+int		 GetFrozenCount(void);
 
 

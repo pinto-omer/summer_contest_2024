@@ -298,7 +298,16 @@ void UpdatePlayer(void)
 						height -= TILE_HEIGHT;
 						y += TILE_HEIGHT;
 					}
+					int fCount = GetFrozenCount();
+					for (int j = 0; j < fCount && !collided; j++)
+					{
+						BULLET* frozenB = GetFrozen()[j];
+						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x+ g_Player[i].w * 0.01f,g_Player[i].pos.y,0), g_Player[i].w * 0.5f, g_Player[i].h,
+							frozenB->pos, frozenB->w, frozenB->h,
+							g_Player[i].rot.z, frozenB->rot.z))
+							collided = TRUE;
 
+					}
 					if (!collided && !goal)
 					{
 						g_Player[i].pos.x += speed;
@@ -331,7 +340,16 @@ void UpdatePlayer(void)
 						height -= TILE_HEIGHT;
 						y += TILE_HEIGHT;
 					}
+					int fCount = GetFrozenCount();
+					for (int j = 0; j < fCount && !collided; j++)
+					{
+						BULLET* frozenB = GetFrozen()[j];
+						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w * 0.05f, g_Player[i].pos.y, 0), g_Player[i].w * 0.25f, g_Player[i].h,
+							frozenB->pos, frozenB->w, frozenB->h,
+							g_Player[i].rot.z, frozenB->rot.z))
+							collided = TRUE;
 
+					}
 					if (!collided && !goal)
 					{
 						g_Player[i].pos.x -= speed;
@@ -497,7 +515,7 @@ void UpdatePlayer(void)
 					if (g_Player[i].freezeRadius < 1.0f)
 						g_Player[i].freezeRadius += 1.0f / FREEZE_FRAME_COUNT;
 					else
-						g_Player[i].freeze = false;
+						g_Player[i].freeze = FALSE;
 
 				}
 				// MAP外チェック
