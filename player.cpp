@@ -302,7 +302,7 @@ void UpdatePlayer(void)
 					for (int j = 0; j < fCount && !collided; j++)
 					{
 						BULLET* frozenB = GetFrozen()[j];
-						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x+ g_Player[i].w * 0.05f,g_Player[i].pos.y,0), g_Player[i].w * 0.5f, g_Player[i].h,
+						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x+ g_Player[i].w * 0.2f,g_Player[i].pos.y,0), g_Player[i].w * 0.01f, g_Player[i].h,
 							frozenB->pos, frozenB->w, frozenB->h,
 							g_Player[i].rot.z, frozenB->rot.z))
 							collided = TRUE;
@@ -344,7 +344,7 @@ void UpdatePlayer(void)
 					for (int j = 0; j < fCount && !collided; j++)
 					{
 						BULLET* frozenB = GetFrozen()[j];
-						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w * 0.05f, g_Player[i].pos.y, 0), g_Player[i].w * 0.25f, g_Player[i].h,
+						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w * 0.2f, g_Player[i].pos.y, 0), g_Player[i].w * 0.01f, g_Player[i].h,
 							frozenB->pos, frozenB->w, frozenB->h,
 							g_Player[i].rot.z, frozenB->rot.z))
 							collided = TRUE;

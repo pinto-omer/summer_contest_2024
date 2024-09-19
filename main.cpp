@@ -180,7 +180,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				Draw();				// 描画処理
 
 #ifdef _DEBUG	// デバッグ版の時だけ表示する
-				wsprintf(&g_DebugStr[strlen(g_DebugStr)], " MX:%d MY:%d", GetMousePosX(), GetMousePosY());
+				wsprintf(&g_DebugStr[strlen(g_DebugStr)], " MX:%d MY:%d", (long)(GetMousePosX() + (g_Mode == MODE_GAME ? GetBG()->pos.x : 0)), (long)(GetMousePosY() + (g_Mode == MODE_GAME ? GetBG()->pos.y : 0)));
 				SetWindowText(hWnd, g_DebugStr);
 #endif
 
