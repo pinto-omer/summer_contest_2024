@@ -15,6 +15,7 @@
 #include "tile.h"
 #include "field.h"
 #include "sound.h"
+
 //*****************************************************************************
 // マクロ定義
 //*****************************************************************************
@@ -599,7 +600,8 @@ void DrawPlayer(void)
 					py = GetGroundBelow(g_Player[i].pos).y /*+ GetField()->tile_h*/ - bg->pos.y;
 				else
 					py += g_Player[i].h / 2.0f;		// 足元に表示
-				float pw = g_Player[i].w;		// プレイヤーの表示幅
+				float maxShadow = g_Player[i].w * 0.6f;
+				float pw = maxShadow * (1.0f - min((py - g_Player[i].h * 0.5f - g_Player[i].pos.y+bg->pos.y),300.0f) / 300.0f);		// プレイヤーの表示幅
 				float ph = g_Player[i].h / 4;		// プレイヤーの表示高さ
 
 				float tw = 1.0f;	// テクスチャの幅
