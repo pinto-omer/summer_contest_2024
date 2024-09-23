@@ -422,34 +422,59 @@ void UpdatePlayer(void)
 
 					if (g_Player[i].jumpCnt <= PLAYER_JUMP_CNT_MAX / 2)
 					{
+						BOOL collided = FALSE;
 						g_Player[i].pos.y += y - g_Player[i].jumpY;
 						g_Player[i].jumpY = y;
-						XMFLOAT3 pPos = XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y - g_Player[i].h / 2.0f, 0);
-						int type = GetTileType(pPos);
+						XMFLOAT3 pHeadPos = XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y - g_Player[i].h / 2.0f, 0);
+						int type = GetTileType(pHeadPos);
 						if (type != AIR)
 						{
+							collided = TRUE;
 							if (type == GOAL)
 							{
 								gameOverStatus = GAME_CLEAR;
 								return;
 							}
-							if (type != TYPE_ARROW)
-								g_Player[i].pos.y = (int)(g_Player[i].pos.y / GetTile()->h) * GetTile()->h + g_Player[i].h / 2.0f;
 							else
+								g_Player[i].pos.y = (int)(g_Player[i].pos.y / GetTile()->h) * GetTile()->h + g_Player[i].h / 2.0f;
+						}
+						else
+						{
+							BULLET* bullet = GetBullet();
+							for (int j = 0; j < BULLET_MAX; j++)
 							{
-								BULLET* bullet = GetBullet();
-								for (int j = 0; j < BULLET_MAX; j++)
+								if (!bullet[j].use || !bullet[j].frozen) continue;
+								else if (bullet[j].frozen)
+									if ((bullet[j].rot.z == 0.0f || bullet[j].rot.z == 3.14f) &&
+										CollisionBB(pHeadPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.5f, bullet[j].h))
+										g_Player[i].pos.y = bullet[j].pos.y + bullet[j].w * 0.5f + g_Player[j].h * 0.5f;
+									else if ((bullet[j].rot.z != 0.0f && bullet[j].rot.z != 3.14f) &&
+										CollisionBB(pHeadPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].h, bullet[j].w * 0.5f))
+										g_Player[i].pos.y = bullet[j].pos.y + bullet[j].h * 0.5f + g_Player[j].h * 0.5f;
+							}
+							BULLET** frozen = GetFrozen();
+							for (int j = 0; j < GetFrozenCount() && !collided; j++)
+							{
+								collided = CollisionBBRight(pHeadPos, g_Player[i].w * 0.5f, 0.0f, frozen[j]->pos, frozen[j]->w, frozen[j]->h, g_Player[i].rot.z, frozen[j]->rot.z);
+								if (collided)
 								{
-									if (!bullet[j].use || !bullet[j].frozen) continue;
-									else if (bullet[j].frozen)
-										if ((bullet[j].rot.z == 0.0f || bullet[j].rot.z == 3.14f) &&
-											CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.5f, bullet[j].h))
-											g_Player[i].pos.y = bullet[j].pos.y + bullet[j].w * 0.5f + g_Player[j].h * 0.5f;
-										else if ((bullet[j].rot.z != 0.0f && bullet[j].rot.z != 3.14f) &&
-											CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].h, bullet[j].w * 0.5f))
-											g_Player[i].pos.y = bullet[j].pos.y + bullet[j].h * 0.5f + g_Player[j].h * 0.5f;
+									float bw, bh;
+									bw = frozen[j]->w;
+									bh = frozen[j]->h;
+									if (frozen[j]->rot.z != 0 && frozen[j]->rot.z != 3.14f)
+									{
+										float temp = bw;
+										bw = bh;
+										bh = temp;
+									}
+
+									g_Player[i].pos.y = frozen[j]->pos.y + bh * 0.55f + g_Player[i].h * 0.5f;
 								}
 							}
+						}
+
+						if (collided)
+						{
 							g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX;
 							g_Player[i].jumpY = 0;
 						}
@@ -484,7 +509,7 @@ void UpdatePlayer(void)
 							BULLET** frozen = GetFrozen();
 							for (int j = 0; j < GetFrozenCount() && !collided; j++)
 							{
-								collided = CollisionBBRight(pFeetPos, g_Player[i].w * 0.5f, 1.0f, frozen[j]->pos, frozen[j]->w, frozen[j]->h, g_Player[i].rot.z, frozen[j]->rot.z);
+								collided = CollisionBBRight(pFeetPos, g_Player[i].w * 0.5f, 0.0f, frozen[j]->pos, frozen[j]->w, frozen[j]->h, g_Player[i].rot.z, frozen[j]->rot.z);
 								if (collided)
 								{
 									float bw, bh;
