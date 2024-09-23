@@ -136,7 +136,7 @@ void UpdateResult(void)
 {
 	if (GetGameOverStatus() == GAME_OVER && g_patternAnim < TEXTURE_PATTERN_DIVIDE_X - 1)
 	{
-		g_countAnim+=0.33f;
+		g_countAnim += 0.33f;
 		if (g_countAnim >= ANIM_WAIT)
 		{
 			g_patternAnim++;
@@ -145,12 +145,12 @@ void UpdateResult(void)
 	}
 	else
 	{
-		if (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(0, BUTTON_START) || IsButtonTriggered(0, BUTTON_A))
+		if (GetKeyboardTrigger(DIK_SPACE) || GetKeyboardTrigger(DIK_RETURN) || IsButtonTriggered(0, BUTTON_START) || IsButtonTriggered(0, BUTTON_A))
 		{// Enter押したら、ステージを切り替える
 			SetFade(FADE_OUT, MODE_TITLE);
 		}
-	
-}
+
+	}
 
 
 #ifdef _DEBUG	// デバッグ情報を表示する
@@ -214,14 +214,14 @@ void DrawResult(void)
 
 		float tw = 1.0f / TEXTURE_PATTERN_DIVIDE_X;	// テクスチャの幅
 		float th = 1.0f; 	// テクスチャの高さ
-		float tx =g_patternAnim * tw;	// テクスチャの左上X座標
+		float tx = g_patternAnim * tw;	// テクスチャの左上X座標
 		float ty = 0.0f;	// テクスチャの左上Y座標
-	
+
 		// テクスチャ設定
 		GetDeviceContext()->PSSetShaderResources(0, 1, &g_Texture[DEAD]);
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
-		SetSpriteLeftTop(g_VertexBuffer, px,py, pw, ph, tx, ty, tw, th);
+		SetSpriteLeftTop(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th);
 
 		// ポリゴン描画
 		GetDeviceContext()->Draw(4, 0);

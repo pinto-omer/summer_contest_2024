@@ -548,7 +548,12 @@ void UpdatePlayer(void)
 					g_Player[i].jumpY = 0;// g_Player[i].pos.y;
 				}
 
-				if (!g_Player[i].moving && !g_Player[i].jump && !g_Player[i].freeze)
+				if (GetKeyboardTrigger(DIK_R) || IsButtonTriggered(0, BUTTON_Y))
+				{
+					g_Player[i].freeze = FALSE;
+					DelAllFrozen();
+				}
+				if (!g_Player[i].freeze)
 				{
 					if (GetKeyboardTrigger(DIK_F) || IsButtonTriggered(0, BUTTON_X))
 					{

@@ -265,7 +265,6 @@ void UpdateBullet(void)
 			}
 			else if (--g_Bullet[i].freezeRemaining == 0)
 			{
-				g_Bullet[i].frozen = FALSE;
 				DelFrozen(&g_Bullet[i]);
 				/*float y1, y2, x1, x2;
 				y1 = g_Bullet[i].pos.y + 0.5f * (g_Bullet[i].rot.z == 0 || g_Bullet[i].rot.z == 3.14f ? g_Bullet[i].h : g_Bullet[i].w);
@@ -406,6 +405,12 @@ int GetFrozenCount(void)
 	return g_FrozenCount;
 }
 
+void DelAllFrozen(void)
+{
+	while (g_FrozenCount > 0)
+		DelFrozen(g_Frozen[0]);
+}
+
 void AddFrozen(BULLET* bullet)
 {
 	g_Frozen[g_FrozenCount++] = bullet;
@@ -418,11 +423,14 @@ void DelFrozen(BULLET* bullet)
 	{
 		if (!removed && g_Frozen[i] == bullet)
 		{
+			g_Frozen[i]->frozen = FALSE;
 			g_Frozen[i] = NULL;
 			removed = TRUE;
 		}
 		if (removed && i < BULLET_MAX)
+		{
 			g_Frozen[i] = g_Frozen[i + 1];
+		}
 	}
 	g_FrozenCount--;
 }
