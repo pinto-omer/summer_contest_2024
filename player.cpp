@@ -303,7 +303,7 @@ void UpdatePlayer(void)
 					for (int j = 0; j < fCount && !collided; j++)
 					{
 						BULLET* frozenB = GetFrozen()[j];
-						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x+ g_Player[i].w * 0.2f,g_Player[i].pos.y,0), g_Player[i].w * 0.01f, g_Player[i].h,
+						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w * 0.2f, g_Player[i].pos.y, 0), g_Player[i].w * 0.01f, g_Player[i].h,
 							frozenB->pos, frozenB->w, frozenB->h,
 							g_Player[i].rot.z, frozenB->rot.z))
 							collided = TRUE;
@@ -364,7 +364,7 @@ void UpdatePlayer(void)
 						return;
 					}
 				}
-				else if (GetKeyboardTrigger(DIK_ESCAPE) || IsButtonTriggered(0,BUTTON_START))
+				else if (GetKeyboardTrigger(DIK_ESCAPE) || IsButtonTriggered(0, BUTTON_START))
 				{
 					ToggleMenu();
 				}
@@ -396,12 +396,20 @@ void UpdatePlayer(void)
 					}
 				}
 #endif
-				if (GetTileType(XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0)) == AIR &&
+				XMFLOAT3 pFeetPos = XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0);
+				if (GetTileType(pFeetPos) == AIR &&
 					g_Player[i].jump == FALSE)
 				{
-					g_Player[i].jump = TRUE;
-					g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX;
-					g_Player[i].jumpY = 0;// g_Player[i].pos.y + PLAYER_JUMP_Y_MAX;
+					BOOL collided = FALSE;
+					BULLET** frozen = GetFrozen();
+					for (int j = 0; j < GetFrozenCount() && !collided; j++)
+						collided = CollisionBBRight(pFeetPos, g_Player[i].w * 0.5f, g_Player[i].h * 0.1f, frozen[j]->pos, frozen[j]->w, frozen[j]->h, g_Player[i].rot.z, frozen[j]->rot.z);
+					if (!collided)
+					{
+						g_Player[i].jump = TRUE;
+						g_Player[i].jumpCnt = PLAYER_JUMP_CNT_MAX;
+						g_Player[i].jumpY = 0;// g_Player[i].pos.y + PLAYER_JUMP_Y_MAX;
+					}
 				}
 
 
@@ -454,35 +462,53 @@ void UpdatePlayer(void)
 
 					}
 
-					XMFLOAT3 pPos = XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0);
-					int type = GetTileType(pPos);
-					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2 &&
-						(type == GROUND ||
-							type == TYPE_ARROW ||
-							type == GOAL))
+					int type = GetTileType(pFeetPos);
+					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2)
 					{
-						if (type == GROUND)
-							g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y - g_Player[i].h / 2.0f;
-						else if (type == GOAL)
+						BOOL collided = FALSE;
+						if (type == GROUND ||
+							type == GOAL)
 						{
-							gameOverStatus = GAME_CLEAR;
-							return;
+							collided = TRUE;
+							if (type == GROUND)
+								g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y - g_Player[i].h / 2.0f;
+							else
+							{
+								gameOverStatus = GAME_CLEAR;
+								return;
+							}
+
 						}
 						else
 						{
-							BULLET* bullet = GetBullet();
-							for (int j = 0; j < BULLET_MAX; j++)
+							BULLET** frozen = GetFrozen();
+							for (int j = 0; j < GetFrozenCount() && !collided; j++)
 							{
-								if (!bullet[j].use || !bullet[j].frozen) continue;
-								else if (bullet[j].frozen &&
-									CollisionBB(pPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.33f, bullet[j].h))
-									g_Player[i].pos.y = bullet[j].pos.y - bullet[j].w * 0.33f - g_Player[i].h * 0.5f;
+								collided = CollisionBBRight(pFeetPos, g_Player[i].w * 0.5f, 1.0f, frozen[j]->pos, frozen[j]->w, frozen[j]->h, g_Player[i].rot.z, frozen[j]->rot.z);
+								if (collided)
+								{
+									float bw, bh;
+									bw = frozen[j]->w;
+									bh = frozen[j]->h;
+									if (frozen[j]->rot.z != 0 && frozen[j]->rot.z != 3.14f)
+									{
+										float temp = bw;
+										bw = bh;
+										bh = temp;
+									}
+
+									g_Player[i].pos.y = frozen[j]->pos.y - bh * 0.55f - g_Player[i].h * 0.5f;
+								}
 							}
 						}
-						g_Player[i].jump = FALSE;
-						g_Player[i].jumpCnt = 0;
-						g_Player[i].jumpY = 0.0f;
-						g_Player[i].fallSpeed = 0.0f;
+						if (collided)
+						{
+							g_Player[i].jump = FALSE;
+							g_Player[i].jumpCnt = 0;
+							g_Player[i].jumpY = 0.0f;
+							g_Player[i].fallSpeed = 0.0f;
+						}
+
 					}
 					else
 					{
@@ -494,7 +520,7 @@ void UpdatePlayer(void)
 
 				}
 				// ジャンプボタン押した？
-				else if (g_Player[i].jump == FALSE && (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(0,BUTTON_A)))
+				else if (g_Player[i].jump == FALSE && (GetKeyboardTrigger(DIK_SPACE) || IsButtonTriggered(0, BUTTON_A)))
 				{
 					g_Player[i].jump = TRUE;
 					g_Player[i].jumpCnt = 1;
@@ -503,7 +529,7 @@ void UpdatePlayer(void)
 
 				if (!g_Player[i].moving && !g_Player[i].jump && !g_Player[i].freeze)
 				{
-					if (GetKeyboardTrigger(DIK_F) || IsButtonTriggered(0,BUTTON_X))
+					if (GetKeyboardTrigger(DIK_F) || IsButtonTriggered(0, BUTTON_X))
 					{
 						g_Player[i].freeze = TRUE;
 						g_Player[i].freezePos = g_Player[i].pos;
@@ -597,11 +623,27 @@ void DrawPlayer(void)
 				float px = g_Player[i].pos.x - bg->pos.x;	// プレイヤーの表示位置X
 				float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
 				if (g_Player[i].jump == TRUE)
-					py = GetGroundBelow(g_Player[i].pos).y /*+ GetField()->tile_h*/ - bg->pos.y;
+				{
+					py = GetGroundBelow(g_Player[i].pos).y;
+					BULLET** frozen = GetFrozen();
+					for (int j = 0; j < GetFrozenCount(); j++)
+					{
+						if (frozen[j]->pos.y > py || frozen[j]->pos.y < g_Player[i].pos.y) continue;
+						if (CollisionBBRight(XMFLOAT3(g_Player[i].pos.x, frozen[j]->pos.y, 0.0f), g_Player[i].w * 0.4f, 0.0f,
+							frozen[j]->pos, frozen[j]->w, frozen[j]->h, g_Player[i].rot.z, frozen[j]->rot.z))
+						{
+							float tmp = frozen[j]->pos.y - ((frozen[j]->rot.z != 0 && frozen[j]->rot.z != 3.14f) ? frozen[j]->w : frozen[j]->h) * 0.55f;
+							if (tmp < py)
+								py = tmp;	
+						}
+
+					}
+					py -= bg->pos.y;
+				}
 				else
 					py += g_Player[i].h / 2.0f;		// 足元に表示
 				float maxShadow = g_Player[i].w * 0.6f;
-				float pw = maxShadow * (1.0f - min((py - g_Player[i].h * 0.5f - g_Player[i].pos.y+bg->pos.y),300.0f) / 300.0f);		// プレイヤーの表示幅
+				float pw = maxShadow * (1.0f - min((py - g_Player[i].h * 0.5f - g_Player[i].pos.y + bg->pos.y), 300.0f) / 300.0f);		// プレイヤーの表示幅
 				float ph = g_Player[i].h / 4;		// プレイヤーの表示高さ
 
 				float tw = 1.0f;	// テクスチャの幅

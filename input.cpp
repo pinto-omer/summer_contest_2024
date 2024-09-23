@@ -500,13 +500,17 @@ void UpdatePad(void)
 
 		// ３２の各ビットに意味を持たせ、ボタン押下に応じてビットをオンにする
 		//* y-axis (forward)
-		if ( dijs.lY < 0 )					padState[i] |= BUTTON_UP;
+		if ( dijs.lY < 0 || (dijs.rgdwPOV[0] > 27000 && dijs.rgdwPOV[0] != -1) ||(dijs.rgdwPOV[0] >= 0 && dijs.rgdwPOV[0] < 9000))
+			padState[i] |= BUTTON_UP;
 		//* y-axis (backward)
-		if ( dijs.lY > 0 )					padState[i] |= BUTTON_DOWN;
+		if ( dijs.lY > 0 || (dijs.rgdwPOV[0] < 27000 && dijs.rgdwPOV[0] > 9000))
+			padState[i] |= BUTTON_DOWN;
 		//* x-axis (left)
-		if ( dijs.lX < 0 )					padState[i] |= BUTTON_LEFT;
+		if ( dijs.lX < 0 || (dijs.rgdwPOV[0] > 18000 && dijs.rgdwPOV[0] != -1))
+			padState[i] |= BUTTON_LEFT;
 		//* x-axis (right)
-		if ( dijs.lX > 0 )					padState[i] |= BUTTON_RIGHT;
+		if (dijs.lX > 0 || (dijs.rgdwPOV[0] > 0 && dijs.rgdwPOV[0] <  18000))
+			padState[i] |= BUTTON_RIGHT;
 		//* Ｘボタン
 		if (dijs.rgbButtons[rgbButtons_X] & 0x80)	padState[i] |= BUTTON_X;
 		//* Ａボタン
