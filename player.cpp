@@ -288,7 +288,7 @@ void UpdatePlayer(void)
 					float y = g_Player[i].pos.y - height / 2.0f;
 					while (height > 0)
 					{
-						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w / 4.0f, y, 0));
+						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x + g_Player[i].w * 0.25f, y, 0));
 						if (tileType == GOAL)
 							goal = TRUE;
 						else if (tileType != AIR)
@@ -330,7 +330,7 @@ void UpdatePlayer(void)
 					float y = g_Player[i].pos.y - height / 2.0f;
 					while (height > 0)
 					{
-						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w / 4.0f, y, 0));
+						int tileType = GetTileType(XMFLOAT3(g_Player[i].pos.x - g_Player[i].w * 0.25f, y, 0));
 						if (tileType == GOAL)
 							goal = TRUE;
 						else if (tileType != AIR)
@@ -396,8 +396,14 @@ void UpdatePlayer(void)
 					}
 				}
 #endif
+				XMFLOAT3 lFoot, rFoot;
 				XMFLOAT3 pFeetPos = XMFLOAT3(g_Player[i].pos.x, g_Player[i].pos.y + g_Player[i].h / 2.0f, 0);
-				if (GetTileType(pFeetPos) == AIR &&
+				lFoot = pFeetPos;
+				lFoot.x -= g_Player[i].w * 0.15f;
+				rFoot = pFeetPos;
+				rFoot.x += g_Player[i].w * 0.15f;
+				if (GetTileType(lFoot) == AIR &&
+					GetTileType(rFoot) == AIR &&
 					g_Player[i].jump == FALSE)
 				{
 					BOOL collided = FALSE;
@@ -440,18 +446,6 @@ void UpdatePlayer(void)
 						}
 						else
 						{
-							BULLET* bullet = GetBullet();
-							for (int j = 0; j < BULLET_MAX; j++)
-							{
-								if (!bullet[j].use || !bullet[j].frozen) continue;
-								else if (bullet[j].frozen)
-									if ((bullet[j].rot.z == 0.0f || bullet[j].rot.z == 3.14f) &&
-										CollisionBB(pHeadPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].w * 0.5f, bullet[j].h))
-										g_Player[i].pos.y = bullet[j].pos.y + bullet[j].w * 0.5f + g_Player[j].h * 0.5f;
-									else if ((bullet[j].rot.z != 0.0f && bullet[j].rot.z != 3.14f) &&
-										CollisionBB(pHeadPos, g_Player[i].w * 0.5f, 1.0f, bullet[j].pos, bullet[j].h, bullet[j].w * 0.5f))
-										g_Player[i].pos.y = bullet[j].pos.y + bullet[j].h * 0.5f + g_Player[j].h * 0.5f;
-							}
 							BULLET** frozen = GetFrozen();
 							for (int j = 0; j < GetFrozenCount() && !collided; j++)
 							{
@@ -486,8 +480,10 @@ void UpdatePlayer(void)
 							g_Player[i].fallSpeed += PLAYER_JUMP_GRAVITY;
 
 					}
-
-					int type = GetTileType(pFeetPos);
+					int type = GetTileType(lFoot);
+					BOOL left = type != AIR ? TRUE:FALSE;
+					if (type == AIR)
+						type = GetTileType(rFoot);
 					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2)
 					{
 						BOOL collided = FALSE;
@@ -496,7 +492,7 @@ void UpdatePlayer(void)
 						{
 							collided = TRUE;
 							if (type == GROUND)
-								g_Player[i].pos.y = GetGroundBelow(g_Player[i].pos).y - g_Player[i].h / 2.0f;
+								g_Player[i].pos.y = GetGroundBelow(left?lFoot:rFoot).y - g_Player[i].h / 2.0f;
 							else
 							{
 								gameOverStatus = GAME_CLEAR;
@@ -649,7 +645,13 @@ void DrawPlayer(void)
 				float py = g_Player[i].pos.y - bg->pos.y;	// プレイヤーの表示位置Y
 				if (g_Player[i].jump == TRUE)
 				{
-					py = GetGroundBelow(g_Player[i].pos).y;
+					XMFLOAT3 lFoot, rFoot;
+					 lFoot = g_Player[i].pos;
+					 rFoot = g_Player[i].pos;
+					 lFoot.x -= g_Player[i].w * 0.15f;
+					 rFoot.x += g_Player[i].w * 0.15f;
+
+					py = min(GetGroundBelow(lFoot).y, GetGroundBelow(rFoot).y);
 					BULLET** frozen = GetFrozen();
 					for (int j = 0; j < GetFrozenCount(); j++)
 					{
