@@ -41,9 +41,15 @@ static char* g_TexturName[] = {
 	"",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_01.png",
 	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_37.png",
-	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_29.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_trap.png",
 	"",
 	"data/TEXTURE/flag.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_02.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_03.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_06.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_07.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_08.png",
+	"data/TEXTURE/craftpix_free_green_zone/tiles/Tile_17.png",
 };
 
 static XMINT2 g_TexturePatternDivide[] = {
@@ -53,6 +59,13 @@ static XMINT2 g_TexturePatternDivide[] = {
 	XMINT2(1,1),
 	XMINT2(1,1),
 	XMINT2(7,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+	XMINT2(1,1),
+
 };
 
 static BOOL		g_Load = FALSE;			// èâä˙âªÇçsÇ¡ÇΩÇ©ÇÃÉtÉâÉO
