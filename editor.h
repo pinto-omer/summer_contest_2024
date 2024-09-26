@@ -42,5 +42,3 @@ void UpdateEditor(void);
 void DrawEditor(void);
 
 EDITOR* GetEditor(void);
-
-

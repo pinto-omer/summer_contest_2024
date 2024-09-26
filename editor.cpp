@@ -57,7 +57,6 @@ static EDITOR	g_Editor;		// プレイヤー構造体
 
 static int		g_PadMoveY;
 static int		g_PadMoveX;
-
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -90,7 +89,7 @@ HRESULT InitEditor(void)
 
 	// プレイヤー構造体の初期化
 
-	g_Editor.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);	// 中心点から表示
+	g_Editor.pos = XMFLOAT3(0.0f, (FIELD_TILE_H - 3) * TILE_HEIGHT, 0.0f);	// 中心点から表示
 	g_Editor.w = TEXTURE_WIDTH;
 	g_Editor.h = TEXTURE_HEIGHT;
 	g_Editor.texNo = TILE_EMPTY;
@@ -331,6 +330,15 @@ void UpdateEditor(void)
 			}
 			PlaySound(SOUND_LABEL_SE_PLACE);
 		}
+		else if (GetKeyboardTrigger(DIK_F) || IsButtonPressed(0, BUTTON_Y))
+		{
+			XMFLOAT3 pos = g_Editor.pos;
+			PLAYER* player = GetPlayer();
+			pos.x += player->w * 0.25f;
+			pos.y += player->h * 0.25f;
+			player->pos = pos;
+			setStartPos(pos);
+		}
 		else if (GetKeyboardTrigger(DIK_ESCAPE) || IsButtonTriggered(0, BUTTON_START))
 		{
 			ToggleMenu();
@@ -449,5 +457,6 @@ EDITOR* GetEditor(void)
 {
 	return &g_Editor;
 }
+
 
 

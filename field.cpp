@@ -88,6 +88,7 @@ HRESULT InitField(void)
 			g_Field.field[i][j] = TILE_EMPTY;
 
 	LoadField(fieldNum);
+	fieldNum = 0;
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -184,6 +185,11 @@ FIELD* GetField(void)
 void SetField(int fieldNumber)
 {
 	fieldNum = fieldNumber;
+}
+
+int GetFieldNum(void)
+{
+	return fieldNum;
 }
 
 int GetTileType(XMFLOAT3 pos)

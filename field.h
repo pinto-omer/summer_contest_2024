@@ -42,6 +42,7 @@ HRESULT InitField(void);
 void UninitField(void);
 void UpdateField(void);
 void DrawField(void);
+int GetFieldNum(void);
 
 FIELD* GetField(void);
 void SetField(int fieldNumber);

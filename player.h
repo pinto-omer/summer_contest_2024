@@ -74,6 +74,7 @@ struct PLAYER
 };
 
 
+
 //*****************************************************************************
 // プロトタイプ宣言
 //*****************************************************************************
@@ -88,3 +89,5 @@ int GetPlayerCount(void);
 void DamagePlayer(PLAYER* player);
 
 int GetGameOverStatus(void);
+
+void setStartPos(XMFLOAT3 startPos);

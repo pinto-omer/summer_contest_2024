@@ -95,6 +95,7 @@ static int		g_jump[PLAYER_JUMP_CNT_MAX] =
 };
 
 static int		gameOverStatus;
+static XMFLOAT3 startPos = XMFLOAT3(-1, -1, 0);
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -133,7 +134,10 @@ HRESULT InitPlayer(void)
 	{
 		g_PlayerCount++;
 		g_Player[i].use = TRUE;
-		g_Player[i].pos = XMFLOAT3(PLAYER_INITIAL_X, PLAYER_INITIAL_Y, 0.0f);	// 中心点から表示
+		if (startPos.x == -1 || startPos.y == -1)
+			g_Player[i].pos = XMFLOAT3(PLAYER_INITIAL_X, PLAYER_INITIAL_Y, 0.0f);	// 中心点から表示
+		else
+			g_Player[i].pos = startPos;
 		g_Player[i].rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		g_Player[i].w = TEXTURE_WIDTH;
 		g_Player[i].h = TEXTURE_HEIGHT;
@@ -166,6 +170,8 @@ HRESULT InitPlayer(void)
 	}
 	gameOverStatus = 0;
 
+	if (startPos.x != -1 || startPos.y != -1)
+		startPos = XMFLOAT3(-1, -1, 0);
 	g_Load = TRUE;
 	return S_OK;
 }
@@ -481,7 +487,7 @@ void UpdatePlayer(void)
 
 					}
 					int type = GetTileType(lFoot);
-					BOOL left = type != AIR ? TRUE:FALSE;
+					BOOL left = type != AIR ? TRUE : FALSE;
 					if (type == AIR)
 						type = GetTileType(rFoot);
 					if (g_Player[i].jumpCnt > PLAYER_JUMP_CNT_MAX / 2)
@@ -492,7 +498,7 @@ void UpdatePlayer(void)
 						{
 							collided = TRUE;
 							if (type == GROUND)
-								g_Player[i].pos.y = GetGroundBelow(left?lFoot:rFoot).y - g_Player[i].h / 2.0f;
+								g_Player[i].pos.y = GetGroundBelow(left ? lFoot : rFoot).y - g_Player[i].h / 2.0f;
 							else
 							{
 								gameOverStatus = GAME_CLEAR;
@@ -651,10 +657,10 @@ void DrawPlayer(void)
 				if (g_Player[i].jump == TRUE)
 				{
 					XMFLOAT3 lFoot, rFoot;
-					 lFoot = g_Player[i].pos;
-					 rFoot = g_Player[i].pos;
-					 lFoot.x -= g_Player[i].w * 0.15f;
-					 rFoot.x += g_Player[i].w * 0.15f;
+					lFoot = g_Player[i].pos;
+					rFoot = g_Player[i].pos;
+					lFoot.x -= g_Player[i].w * 0.15f;
+					rFoot.x += g_Player[i].w * 0.15f;
 
 					py = min(GetGroundBelow(lFoot).y, GetGroundBelow(rFoot).y);
 					BULLET** frozen = GetFrozen();
@@ -666,7 +672,7 @@ void DrawPlayer(void)
 						{
 							float tmp = frozen[j]->pos.y - ((frozen[j]->rot.z != 0 && frozen[j]->rot.z != 3.14f) ? frozen[j]->w : frozen[j]->h) * 0.55f;
 							if (tmp < py)
-								py = tmp;	
+								py = tmp;
 						}
 
 					}
@@ -831,5 +837,10 @@ void DrawPlayerOffset(int no)
 int GetGameOverStatus(void)
 {
 	return gameOverStatus;
+}
+
+void setStartPos(XMFLOAT3 pos)
+{
+	startPos = pos;
 }
 

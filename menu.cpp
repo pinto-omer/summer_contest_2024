@@ -17,7 +17,7 @@
 //*****************************************************************************
 #define TEXTURE_WIDTH				(250)	// キャラサイズ
 #define TEXTURE_HEIGHT				(50)	// 
-#define TEXTURE_MAX					(13)		// テクスチャの数
+#define TEXTURE_MAX					(14)		// テクスチャの数
 
 #define TEXTURE_WIDTH_SELECT		(50)	// キャラサイズ
 #define TEXTURE_HEIGHT_SELECT		(50)	// 
@@ -47,6 +47,7 @@ static char* g_TexturName[] = {
 	"data/TEXTURE/menu/save.png",
 	"data/TEXTURE/menu/start.png",
 	"data/TEXTURE/menu/tutorial.png",
+	"data/TEXTURE/menu/test.png",
 };
 
 static char g_SelectTextureName[] = "data/TEXTURE/menu/select.png";
@@ -66,6 +67,7 @@ enum {
 	SAVE,
 	START,
 	TUTORIAL,
+	TEST,
 };
 static int						g_ModeMenus[MODE_MAX + 1][TEXTURE_MAX];
 static BOOL						isLevelSelect;						// true:使っている  false:未使用
@@ -75,7 +77,7 @@ static int						g_Menu;					// テクスチャ番号
 static int						g_MaxIndex;
 static int						g_MenuIndex;					//
 static BOOL						isSave;
-
+static int						editorLevel = 0;
 //=============================================================================
 // 初期化処理
 //=============================================================================
@@ -117,11 +119,14 @@ HRESULT InitMenu(void)
 	g_ModeMenus[MODE_GAME][0] = RESUME;
 	g_ModeMenus[MODE_GAME][1] = LOAD;
 	g_ModeMenus[MODE_GAME][2] = MAINMENU;
+	if (GetMode() == MODE_GAME && editorLevel != 0)
+		g_ModeMenus[MODE_GAME][3] = LEVEL_EDITOR;
 
 	g_ModeMenus[MODE_EDITOR][0] = RESUME;
-	g_ModeMenus[MODE_EDITOR][1] = SAVE;
-	g_ModeMenus[MODE_EDITOR][2] = LOAD;
-	g_ModeMenus[MODE_EDITOR][3] = MAINMENU;
+	g_ModeMenus[MODE_EDITOR][1] = TEST;
+	g_ModeMenus[MODE_EDITOR][2] = SAVE;
+	g_ModeMenus[MODE_EDITOR][3] = LOAD;
+	g_ModeMenus[MODE_EDITOR][4] = MAINMENU;
 
 	g_ModeMenus[MODE_MAX][0] = PLEVEL1;
 	g_ModeMenus[MODE_MAX][1] = PLEVEL2;
@@ -210,7 +215,13 @@ void UpdateMenu(void)
 			SetFade(FADE_OUT, MODE_MAX);
 			break;
 		case LEVEL_EDITOR:
-			SetField(0);
+			if (GetMode() != MODE_GAME)
+				SetField(0);
+			else
+			{
+				SetField(editorLevel);
+				editorLevel = 0;
+			}
 			SetFade(FADE_OUT, MODE_EDITOR);
 			break;
 		case LOAD:
@@ -220,11 +231,13 @@ void UpdateMenu(void)
 			break;
 		case MAINMENU:
 			SetFade(FADE_OUT, MODE_TITLE);
+			setStartPos(XMFLOAT3(-1, -1, 0));
 			break;
 		case PLEVEL1:
 			if (isSave)
 			{
 				SaveField(1);
+				SetField(1);
 			}
 			else
 			{
@@ -239,6 +252,7 @@ void UpdateMenu(void)
 			if (isSave)
 			{
 				SaveField(2);
+				SetField(2);
 			}
 			else
 			{
@@ -252,6 +266,7 @@ void UpdateMenu(void)
 			if (isSave)
 			{
 				SaveField(3);
+				SetField(3);
 			}
 			else
 			{
@@ -275,6 +290,14 @@ void UpdateMenu(void)
 			break;
 		case TUTORIAL:
 			SetFade(FADE_OUT, MODE_TUTORIAL);
+			break;
+		case TEST:
+			int field = GetFieldNum();
+			if (field != 0)
+			{
+				SetFade(FADE_OUT, MODE_GAME);
+				editorLevel = field;
+			}
 			break;
 		}
 	}
@@ -354,7 +377,7 @@ void DrawMenu(void)
 
 		// １枚のポリゴンの頂点とテクスチャ座標を設定
 		SetSpriteLTColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-			XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+			XMFLOAT4(1.0f, 1.0f, 1.0f, (g_ModeMenus[g_Menu][i] == TEST && GetFieldNum() == 0) ? 0.33f : 1.0f));
 
 		// ポリゴン描画
 		GetDeviceContext()->Draw(4, 0);
