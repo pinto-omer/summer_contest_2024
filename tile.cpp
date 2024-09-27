@@ -126,6 +126,14 @@ HRESULT InitTile(void)
 	
 	g_Tile[TILE_GOAL].type = GOAL;
 
+	g_Tile[TILE_GROUND_2].type = GROUND;
+	g_Tile[TILE_GROUND_3].type = GROUND;
+	g_Tile[TILE_GROUND_4].type = GROUND;
+	g_Tile[TILE_GROUND_5].type = GROUND;
+	g_Tile[TILE_GROUND_6].type = GROUND;
+	g_Tile[TILE_GROUND_7].type = GROUND;
+
+
 
 	g_Load = TRUE;
 	return S_OK;
