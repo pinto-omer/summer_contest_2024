@@ -354,7 +354,7 @@ void DrawMenu(void)
 
 	// ‚P–‡‚Ìƒ|ƒŠƒSƒ“‚Ì’¸“_‚ÆƒeƒNƒXƒ`ƒƒÀ•W‚ðÝ’è
 	SetSpriteLTColor(g_VertexBuffer, px, py, pw, ph, tx, ty, tw, th,
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 0.25f));
+		XMFLOAT4(1.0f, 1.0f, 1.0f, GetMode() == MODE_GAME ? 0.55f : 0.25f));
 
 	// ƒ|ƒŠƒSƒ“•`‰æ
 	GetDeviceContext()->Draw(4, 0);
